@@ -1,56 +1,39 @@
 import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
-import { appsRepository } from "./appsRepository";
+import type { App, UserAppOrder } from "@/common/types";
 import { logger } from "@/server";
+import { appsRepository } from "./appsRepository";
 
 class AppsService {
-  async getAllApps(): Promise<ServiceResponse<any>> {
-    try {
-      const apps = await appsRepository.getAllApps();
-      return ServiceResponse.success("앱 목록 조회 성공", apps);
-    } catch (error) {
-      logger.error({ error }, "Get apps error");
-      return ServiceResponse.failure(
-        "앱 목록 조회 실패",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
+	async getAllApps(): Promise<ServiceResponse<App[] | null>> {
+		try {
+			const apps = await appsRepository.getAllApps();
+			return ServiceResponse.success("앱 목록 조회 성공", apps);
+		} catch (error) {
+			logger.error({ error }, "Get apps error");
+			return ServiceResponse.failure("앱 목록 조회 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-  async getUserAppOrder(userId: number): Promise<ServiceResponse<any>> {
-    try {
-      const order = await appsRepository.getUserAppOrder(userId);
-      return ServiceResponse.success(
-        "앱 순서 조회 성공",
-        order || { app_order: [] }
-      );
-    } catch (error) {
-      logger.error({ error }, "Get user app order error");
-      return ServiceResponse.failure(
-        "앱 순서 조회 실패",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
+	async getUserAppOrder(userId: number): Promise<ServiceResponse<Pick<UserAppOrder, "app_order"> | null>> {
+		try {
+			const order = await appsRepository.getUserAppOrder(userId);
+			return ServiceResponse.success("앱 순서 조회 성공", order || { app_order: [] });
+		} catch (error) {
+			logger.error({ error }, "Get user app order error");
+			return ServiceResponse.failure("앱 순서 조회 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-  async updateUserAppOrder(
-    userId: number,
-    order: string[]
-  ): Promise<ServiceResponse<any>> {
-    try {
-      const result = await appsRepository.updateUserAppOrder(userId, order);
-      return ServiceResponse.success("앱 순서 저장 성공", result);
-    } catch (error) {
-      logger.error({ error }, "Update user app order error");
-      return ServiceResponse.failure(
-        "앱 순서 저장 실패",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
+	async updateUserAppOrder(userId: number, order: string[]): Promise<ServiceResponse<UserAppOrder | null>> {
+		try {
+			const result = await appsRepository.updateUserAppOrder(userId, order);
+			return ServiceResponse.success("앱 순서 저장 성공", result);
+		} catch (error) {
+			logger.error({ error }, "Update user app order error");
+			return ServiceResponse.failure("앱 순서 저장 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
 
 export const appsService = new AppsService();

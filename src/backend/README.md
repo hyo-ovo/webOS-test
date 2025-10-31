@@ -61,6 +61,7 @@ For a visual guide, watch the [video demo](https://github.com/user-attachments/a
 - Development Mode: `pnpm start:dev`
 - Building: `pnpm build`
 - Production Mode: Set `NODE_ENV="production"` in `.env` then `pnpm build && pnpm start:prod`
+- Linting: `pnpm check` (add `--write` to auto-fix issues)
 
 ## 🤝 Feedback and Contributions
 

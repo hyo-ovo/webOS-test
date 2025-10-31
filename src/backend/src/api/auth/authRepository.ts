@@ -11,7 +11,6 @@ interface User {
 class AuthRepository {
   async findUserByFaceEncoding(faceEncoding: string): Promise<User | null> {
     // TODO: 실제로는 벡터 유사도 검색 필요 (pgvector 등)
-    // 현재는 exact match로 구현
     const result = await query(
       "SELECT * FROM users WHERE face_encoding = $1 LIMIT 1",
       [faceEncoding]

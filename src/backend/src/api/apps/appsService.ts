@@ -9,7 +9,7 @@ class AppsService {
       const apps = await appsRepository.getAllApps();
       return ServiceResponse.success("앱 목록 조회 성공", apps);
     } catch (error) {
-      logger.error("Get apps error:", error);
+      logger.error({ error }, "Get apps error");
       return ServiceResponse.failure(
         "앱 목록 조회 실패",
         null,
@@ -26,7 +26,7 @@ class AppsService {
         order || { app_order: [] }
       );
     } catch (error) {
-      logger.error("Get user app order error:", error);
+      logger.error({ error }, "Get user app order error");
       return ServiceResponse.failure(
         "앱 순서 조회 실패",
         null,
@@ -43,7 +43,7 @@ class AppsService {
       const result = await appsRepository.updateUserAppOrder(userId, order);
       return ServiceResponse.success("앱 순서 저장 성공", result);
     } catch (error) {
-      logger.error("Update user app order error:", error);
+      logger.error({ error }, "Update user app order error");
       return ServiceResponse.failure(
         "앱 순서 저장 실패",
         null,

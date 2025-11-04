@@ -6,11 +6,10 @@ import { handleServiceResponse } from "@/common/utils/httpHandlers";
 import { appsService } from "./appsService";
 
 class AppsController {
-	public async getApps(_req: AuthRequest, res: Response) {
-		const serviceResponse = await appsService.getAllApps();
-		return handleServiceResponse(serviceResponse, res);
-	}
-
+	/**
+	 * 사용자별 앱 순서 조회
+	 * GET /api/apps/order
+	 */
 	public async getUserAppOrder(req: AuthRequest, res: Response) {
 		const userId = req.userId;
 		if (!userId) {
@@ -22,6 +21,11 @@ class AppsController {
 		return handleServiceResponse(serviceResponse, res);
 	}
 
+	/**
+	 * 사용자별 앱 순서 저장
+	 * PUT /api/apps/order
+	 * Body: { order: ['com.webos.app.browser', 'com.webos.app.settings', ...] }
+	 */
 	public async updateUserAppOrder(req: AuthRequest, res: Response) {
 		const userId = req.userId;
 		if (!userId) {
@@ -32,6 +36,15 @@ class AppsController {
 		const { order } = req.body;
 		if (!Array.isArray(order)) {
 			const response = ServiceResponse.failure("order는 배열이어야 합니다", null, StatusCodes.BAD_REQUEST);
+			return handleServiceResponse(response, res);
+		}
+
+		if (order.some((item) => typeof item !== "string")) {
+			const response = ServiceResponse.failure(
+				"order 배열의 모든 요소는 문자열이어야 합니다",
+				null,
+				StatusCodes.BAD_REQUEST,
+			);
 			return handleServiceResponse(response, res);
 		}
 

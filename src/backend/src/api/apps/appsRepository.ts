@@ -1,11 +1,11 @@
 import { query } from "@/common/utils/database";
 
 class AppsRepository {
-	async getAllApps() {
-		const result = await query("SELECT * FROM apps ORDER BY name");
-		return result.rows;
-	}
-
+	/**
+	 * 사용자별 앱 순서 조회
+	 * @param userId 사용자 ID
+	 * @returns { app_order: string[] } 또는 null
+	 */
 	async getUserAppOrder(userId: number) {
 		const result = await query("SELECT app_order FROM user_app_orders WHERE user_id = $1", [userId]);
 
@@ -16,6 +16,12 @@ class AppsRepository {
 		return result.rows[0];
 	}
 
+	/**
+	 * 사용자별 앱 순서 저장/업데이트
+	 * @param userId 사용자 ID
+	 * @param order 앱 ID 순서 배열 (예: ['com.webos.app.browser', 'com.webos.app.settings'])
+	 * @returns 저장된 레코드
+	 */
 	async updateUserAppOrder(userId: number, order: string[]) {
 		const result = await query(
 			`INSERT INTO user_app_orders (user_id, app_order) 

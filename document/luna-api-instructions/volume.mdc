@@ -54,7 +54,6 @@ return;
 });
 Return example
 
-{
 'returnValue': true
 **_ Begin Patch
 _** Update File: /Users/Inyoung/Desktop/26-2/lg-capstone/2025_sogang_6/document/luna-api-instructions/volume.md

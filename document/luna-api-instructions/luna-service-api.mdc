@@ -1,4 +1,8 @@
-Luna Service API Introduction
+---
+alwaysApply: true
+---
+
+# Luna Service API Introduction
 webOS TV provides the Luna Service that consists of essential services and features for webOS TV. Each service and feature provide application programming interface (API) and its methods for you. With these Luna service APIs, you can request data from the proper service and use the response information to your apps.
 
 Supported Luna Service APIs

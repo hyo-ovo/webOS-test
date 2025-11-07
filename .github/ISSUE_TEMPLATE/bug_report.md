@@ -1,9 +1,7 @@
 ---
 name: Bug
-about: bug issue template
-title: ""
-labels: "Bug"
-assignees: ""
+about: 버그 발생 시 사용하세요.
+title: "[BUG] "
 ---
 
 ## 문제 상황 (AS-IS)

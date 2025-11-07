@@ -1,9 +1,7 @@
 ---
-name: 📋 Task
+name: Task
 about: 일반적인 작업이나 TODO를 기록할 때 사용하세요.
 title: "[TASK] "
-labels: task
-assignees: ""
 ---
 
 ## 작업 내용

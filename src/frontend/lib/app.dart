@@ -12,8 +12,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigoAccent),
         useMaterial3: true,
+        fontFamily: 'Pretendard', // Pretendard 기본 폰트 설정
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.bold),
+          displayMedium: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w600),
+          bodyLarge: TextStyle(fontFamily: 'Pretendard'),
+          bodyMedium: TextStyle(fontFamily: 'Pretendard'),
+          labelLarge: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w500),
+        ),
       ),
-      home: const InitialScreen(), // 로그인/회원가입 플로우 시작
+      home: const InitialScreen(),
     );
   }
 }

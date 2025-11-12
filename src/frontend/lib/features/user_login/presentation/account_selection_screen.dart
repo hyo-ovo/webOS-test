@@ -3,77 +3,41 @@ import '../data/user_model.dart';
 import 'face_login_widget.dart';
 import 'register_screen.dart';
 
+/// 계정 선택 화면 - 등록된 사용자 목록 표시
 class AccountSelectionScreen extends StatelessWidget {
   final List<UserModel> users;
 
-  const AccountSelectionScreen({Key? key, required this.users}) : super(key: key);
+  const AccountSelectionScreen({super.key, required this.users});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFE5E5E5),
       body: Center(
-        child: Column(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center, // 수직 정렬 추가
           children: [
-            // 로고
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF4A90E2), Color(0xFF357ABD)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(50),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.blue.withOpacity(0.3),
-                    blurRadius: 15,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: const Icon(Icons.face, size: 60, color: Colors.white),
-            ),
-            const SizedBox(height: 60),
-            
-            // 사용자 프로필 목록
-            Wrap(
-              spacing: 40,
-              runSpacing: 20,
-              alignment: WrapAlignment.center,
-              children: [
-                // 기존 사용자들
-                ...users.map((user) => _buildUserProfile(
+            // 기존 사용자들
+            ...users.map((user) => Padding(
+              padding: const EdgeInsets.only(right: 40),
+              child: _buildUserProfile(
+                context,
+                username: user.username,
+                onTap: () => Navigator.push(
                   context,
-                  username: user.username,
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => FaceLoginWidget(
-                        isRegistration: false,
-                        username: user.username,
-                      ),
+                  MaterialPageRoute(
+                    builder: (_) => FaceLoginWidget(
+                      isRegistration: false,
+                      username: user.username,
                     ),
                   ),
-                )),
-                
-                // 새 계정 추가 버튼
-                _buildAddUserButton(context),
-              ],
-            ),
-            
-            const SizedBox(height: 50),
-            const Text(
-              '계정을 선택해주세요',
-              style: TextStyle(
-                fontSize: 20,
-                color: Colors.black54,
-                fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
+            )),
+            
+            // 새 계정 추가 버튼
+            _buildAddUserButton(context),
           ],
         ),
       ),
@@ -86,34 +50,39 @@ class AccountSelectionScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(70),
+          borderRadius: BorderRadius.circular(50),
           child: Container(
-            width: 140,
-            height: 140,
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
-              color: Colors.grey[200],
+              color: Colors.white,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
                 ),
               ],
             ),
-            child: const Icon(Icons.person, size: 70, color: Colors.black45),
+            child: const Icon(
+              Icons.person,
+              size: 50,
+              color: Colors.black87,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         Text(
           username,
           style: const TextStyle(
-            fontSize: 18,
+            fontSize: 16,
             color: Colors.black87,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
@@ -122,37 +91,37 @@ class AccountSelectionScreen extends StatelessWidget {
 
   Widget _buildAddUserButton(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min, // 추가
       children: [
         InkWell(
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const RegisterScreen()),
           ),
-          borderRadius: BorderRadius.circular(70),
+          borderRadius: BorderRadius.circular(50),
           child: Container(
-            width: 140,
-            height: 140,
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: Colors.white,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: Colors.grey[400]!,
-                width: 3,
-                strokeAlign: BorderSide.strokeAlignInside,
-              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-            child: const Icon(Icons.add, size: 70, color: Colors.black45),
+            child: const Icon(
+              Icons.add,
+              size: 50,
+              color: Colors.black54,
+            ),
           ),
         ),
-        const SizedBox(height: 16),
-        const Text(
-          '새 계정',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.black87,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        const SizedBox(height: 12),
+        const SizedBox(height: 16), // 텍스트 공간 확보
       ],
     );
   }

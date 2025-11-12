@@ -8,11 +8,11 @@ class AuthController {
     return await _repository.getStoredUsers();
   }
 
-  Future<UserModel> registerFace({required String username}) async {
-    if (username.trim().isEmpty) {
-      throw Exception('사용자 이름을 입력해주세요');
-    }
-    return await _repository.registerFace(username: username);
+  Future<UserModel> registerUser(String username, bool isChild) async {
+    return await _repository.registerFace(
+      username: username,
+      isChild: isChild,
+    );
   }
 
   Future<UserModel> loginWithFace({required String username}) async {

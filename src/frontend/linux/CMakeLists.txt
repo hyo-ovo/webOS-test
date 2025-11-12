@@ -1,5 +1,15 @@
+set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
+
 # Project-level configuration.
 cmake_minimum_required(VERSION 3.10)
+project(runner LANGUAGES CXX)
+
+
+
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_C_COMPILER /usr/bin/gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/g++)
 project(runner LANGUAGES CXX)
 
 # The name of the executable created for the application. Change this to change

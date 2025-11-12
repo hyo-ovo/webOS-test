@@ -28,22 +28,6 @@ const addRequestId = (req: Request, res: Response, next: NextFunction) => {
 	next();
 };
 
-const httpLogger = pinoHttp({
-	logger,
-	genReqId: (req) => req.headers["x-request-id"] as string,
-	customLogLevel: (_req, res) => getLogLevel(res.statusCode),
-	customSuccessMessage: (req) => `${req.method} ${req.url} completed`,
-	customErrorMessage: (_req, res) => `Request failed with status code: ${res.statusCode}`,
-	// Only log response bodies in development
-	serializers: {
-		req: (req) => ({
-			method: req.method,
-			url: req.url,
-			id: req.id,
-		}),
-	},
-});
-
 const captureResponseBody = (_req: Request, res: Response, next: NextFunction) => {
 	if (!env.isProduction) {
 		const originalSend = res.send;
@@ -55,4 +39,19 @@ const captureResponseBody = (_req: Request, res: Response, next: NextFunction) =
 	next();
 };
 
-export default [addRequestId, captureResponseBody, httpLogger];
+const requestLogger = pinoHttp({
+	logger,
+	genReqId: (req) => (req.headers["x-request-id"] as string) ?? randomUUID(),
+	customLogLevel: (_req, res) => getLogLevel(res.statusCode),
+	customSuccessMessage: (req) => `${req.method} ${req.url} completed`,
+	customErrorMessage: (_req, res) => `Request failed with status code: ${res.statusCode}`,
+	serializers: {
+		req: (req) => ({
+			method: req.method,
+			url: req.url,
+			id: req.id,
+		}),
+	},
+});
+
+export default requestLogger;

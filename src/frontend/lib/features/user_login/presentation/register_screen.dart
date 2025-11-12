@@ -12,6 +12,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _usernameController = TextEditingController();
   bool _agreeToTerms = false;
+  bool _isChild = false;
 
   @override
   void dispose() {
@@ -38,6 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         builder: (_) => FaceLoginWidget(
           isRegistration: true,
           username: _usernameController.text.trim(),
+          isChild: _isChild,
         ),
       ),
     );
@@ -139,6 +141,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   },
                 ),
                 const SizedBox(height: 30),
+                
+                // 아동용 계정 선택
+                Row(
+                  children: [
+                    Checkbox(
+                      value: _isChild,
+                      onChanged: (value) => setState(() => _isChild = value ?? false),
+                      activeColor: const Color(0xFF4A90E2),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        '아동용 계정입니다',
+                        style: TextStyle(fontSize: 16, color: Colors.black87),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
                 
                 // 개인정보 동의
                 Row(

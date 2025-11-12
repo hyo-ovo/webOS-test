@@ -3,12 +3,14 @@ import '../logic/auth_controller.dart';
 
 class FaceLoginWidget extends StatefulWidget {
   final bool isRegistration;
-  final String username;
+  final String? username;
+  final bool isChild;
 
   const FaceLoginWidget({
     Key? key,
     required this.isRegistration,
-    required this.username,
+    this.username,
+    this.isChild = false,
   }) : super(key: key);
 
   @override
@@ -36,45 +38,45 @@ class _FaceLoginWidgetState extends State<FaceLoginWidget>
     super.dispose();
   }
 
-  Future<void> _captureFace() async {
-    setState(() => _isProcessing = true);
-
+  Future<void> _handleFaceRecognition() async {
     try {
-      // webOS Luna Camera API 호출 (실제 구현 필요)
-      await Future.delayed(const Duration(seconds: 2)); // 카메라 촬영 시뮬레이션
-      
+      setState(() => _isProcessing = true);
+
       if (widget.isRegistration) {
-        await _authController.registerFace(username: widget.username);
-        
+        final user = await _authController.registerUser(
+          widget.username!,
+          widget.isChild,
+        );
+
         if (!mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('회원가입이 완료되었습니다!'),
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // 회원가입 완료 후 홈 화면으로 이동 (추후 구현)
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       } else {
-        await _authController.loginWithFace(username: widget.username);
-        
+        await _authController.loginWithFace(username: widget.username!);
+
         if (!mounted) return;
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('로그인 성공!'),
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // 로그인 완료 후 홈 화면으로 이동 (추후 구현)
         Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
       }
     } catch (e) {
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('오류: $e'),
@@ -114,17 +116,17 @@ class _FaceLoginWidgetState extends State<FaceLoginWidget>
             ),
             const SizedBox(height: 10),
             Text(
-              widget.username,
+              widget.username ?? '',
               style: const TextStyle(
                 fontSize: 20,
                 color: Colors.white70,
               ),
             ),
             const SizedBox(height: 60),
-            
+
             // 얼굴 인식 아이콘
             GestureDetector(
-              onTap: _isProcessing ? null : _captureFace,
+              onTap: _isProcessing ? null : _handleFaceRecognition,
               child: AnimatedBuilder(
                 animation: _pulseController,
                 builder: (context, child) {
@@ -163,7 +165,7 @@ class _FaceLoginWidgetState extends State<FaceLoginWidget>
               ),
             ),
             const SizedBox(height: 40),
-            
+
             Text(
               _isProcessing
                   ? '처리 중...'
@@ -175,11 +177,11 @@ class _FaceLoginWidgetState extends State<FaceLoginWidget>
                 color: Colors.white70,
               ),
             ),
-            
+
             if (!_isProcessing) ...[
               const SizedBox(height: 60),
               ElevatedButton.icon(
-                onPressed: _captureFace,
+                onPressed: _handleFaceRecognition,
                 icon: const Icon(Icons.camera_alt),
                 label: Text(
                   widget.isRegistration ? '얼굴 등록' : '얼굴 인식',

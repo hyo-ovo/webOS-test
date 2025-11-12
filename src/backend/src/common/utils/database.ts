@@ -1,6 +1,8 @@
 import { Pool } from "pg";
-import { env } from "@/common/utils/envConfig";
-import { logger } from "@/server";
+import { env } from "./envConfig";
+import { pino } from "pino";
+
+const logger = pino({ name: "database" });
 
 export const pool = new Pool({
 	host: env.DB_HOST,
@@ -13,92 +15,97 @@ export const pool = new Pool({
 	connectionTimeoutMillis: 2000,
 });
 
-pool.on("error", (err) => {
-	logger.error({ err }, "Unexpected database error");
+pool.on("error", (err: Error) => {
+	logger.error(`Unexpected database error: ${err.message}`);
 	process.exit(-1);
 });
 
-export const query = async (text: string, params?: unknown[]) => {
-	const start = Date.now();
+pool.on("connect", () => {
+	logger.info("New database connection established");
+});
+
+// Query helper function (Repository에서 사용)
+export const query = async (text: string, params?: any[]) => {
+	const client = await pool.connect();
 	try {
-		const res = await pool.query(text, params);
-		const duration = Date.now() - start;
-		logger.debug({ text, duration, rows: res.rowCount }, "Executed query");
-		return res;
-	} catch (error) {
-		logger.error({ text, error }, "Query error");
-		throw error;
+		const result = await client.query(text, params);
+		return result;
+	} finally {
+		client.release();
 	}
 };
 
-// 데이터베이스 초기화 (테이블 생성)
-export const initDatabase = async () => {
+export async function initializeDatabase() {
+	const client = await pool.connect();
 	try {
-		// Users 테이블
-		await query(`
-      CREATE TABLE IF NOT EXISTS users (
-        id SERIAL PRIMARY KEY,
-        username VARCHAR(50) UNIQUE NOT NULL,
-        face_encoding TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+		// 사용자 테이블 (Phase 1: password, Phase 2: face_encoding으로 마이그레이션 예정)
+		await client.query(`
+			CREATE TABLE IF NOT EXISTS users (
+				id SERIAL PRIMARY KEY,
+				username VARCHAR(50) UNIQUE NOT NULL,
+				password VARCHAR(255) NOT NULL,  -- Phase 1: 기본 인증
+				-- face_encoding TEXT,  -- Phase 2: 얼굴 벡터 (128차원 JSON)
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)
+		`);
 
-		// Apps 테이블
-		await query(`
-      CREATE TABLE IF NOT EXISTS apps (
-        id SERIAL PRIMARY KEY,
-        app_id VARCHAR(100) UNIQUE NOT NULL,
-        name VARCHAR(100) NOT NULL,
-        icon_url TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+		// 앱 메타데이터 테이블 (Admin 페이지용, 제안서에는 없지만 필수)
+		await client.query(`
+			CREATE TABLE IF NOT EXISTS apps (
+				app_id VARCHAR(100) PRIMARY KEY,
+				name VARCHAR(100) NOT NULL,
+				icon_url TEXT,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)
+		`);
 
-		// User App Order 테이블
-		await query(`
-      CREATE TABLE IF NOT EXISTS user_app_orders (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        app_order JSONB NOT NULL,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id)
-      )
-    `);
+		// 사용자별 앱 순서 테이블 (제안서 § 1.5)
+		await client.query(`
+			CREATE TABLE IF NOT EXISTS user_app_orders (
+				id SERIAL PRIMARY KEY,
+				user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+				app_order JSONB NOT NULL,  -- webOS 앱 ID 배열
+				updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				UNIQUE(user_id)
+			)
+		`);
 
-		// Memos 테이블
-		await query(`
-      CREATE TABLE IF NOT EXISTS memos (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        title VARCHAR(255) NOT NULL,
-        content TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
+		// 메모 테이블 (제안서 § 1.5)
+		await client.query(`
+			CREATE TABLE IF NOT EXISTS memos (
+				id SERIAL PRIMARY KEY,
+				user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+				title VARCHAR(255) NOT NULL,
+				content TEXT NOT NULL,
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+			)
+		`);
 
-		// Favorites 테이블
-		await query(`
-      CREATE TABLE IF NOT EXISTS favorites (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        app_id VARCHAR(100) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(user_id, app_id)
-      )
-    `);
+		// 즐겨찾기 테이블 (제안서 § 1.5)
+		await client.query(`
+			CREATE TABLE IF NOT EXISTS favorites (
+				id SERIAL PRIMARY KEY,
+				user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+				app_id VARCHAR(100) NOT NULL,  -- webOS 앱 ID (예: "com.webos.app.browser")
+				created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				UNIQUE(user_id, app_id)
+			)
+		`);
 
-		// 인덱스 생성
-		await query(`
-      CREATE INDEX IF NOT EXISTS idx_memos_user_id ON memos(user_id);
-      CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id);
-    `);
+		// 성능을 위한 인덱스 (제안서 § 1.5)
+		await client.query(`CREATE INDEX IF NOT EXISTS idx_memos_user_id ON memos(user_id)`);
+		await client.query(`CREATE INDEX IF NOT EXISTS idx_favorites_user_id ON favorites(user_id)`);
+		await client.query(`CREATE INDEX IF NOT EXISTS idx_user_app_orders_user_id ON user_app_orders(user_id)`);
 
-		logger.info("✅ Database initialized successfully");
+		logger.info("Database initialized successfully");
 	} catch (error) {
-		logger.error({ error }, "❌ Database initialization failed");
+		const errorMessage =
+			error instanceof Error ? error.message : "Unknown error";
+		logger.error(`Failed to initialize database: ${errorMessage}`);
 		throw error;
+	} finally {
+		client.release();
 	}
-};
+}

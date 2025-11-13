@@ -21,6 +21,8 @@ FlutterWindow::FlutterWindow(
     const flutter::DartProject project)
     : view_properties_(view_properties), project_(project) {}
 
+FlutterWindow::~FlutterWindow() = default;
+
 bool FlutterWindow::OnCreate(std::shared_ptr<FlutterApplicationDescription>appDesc) {
 
   embedder_ = std::make_unique<EmbedderLoader>();

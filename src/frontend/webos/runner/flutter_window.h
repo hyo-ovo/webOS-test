@@ -20,7 +20,7 @@ class FlutterWindow {
   explicit FlutterWindow(
       const flutter::FlutterViewController::ViewProperties view_properties,
       const flutter::DartProject project);
-  ~FlutterWindow() = default;
+  ~FlutterWindow();
 
   // Prevent copying.
   FlutterWindow(FlutterWindow const&) = delete;

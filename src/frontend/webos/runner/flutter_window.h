@@ -13,6 +13,8 @@
 
 #include <memory>
 
+class LunaChannelBridge;
+
 class FlutterWindow {
  public:
   explicit FlutterWindow(
@@ -34,6 +36,7 @@ class FlutterWindow {
   std::unique_ptr<flutter::FlutterViewController> flutter_view_controller_;
   std::unique_ptr<WebosInterfaceLoader> webos_plugin_interface_;
   std::unique_ptr<EmbedderLoader> embedder_;
+  std::unique_ptr<LunaChannelBridge> luna_channel_bridge_;
 };
 
 #endif  // FLUTTER_WINDOW_

@@ -6,6 +6,7 @@
 #include "flutter_window.h"
 
 #include "logger.h"
+#include "luna_channel.h"
 
 #include <chrono>
 #include <cmath>
@@ -42,6 +43,13 @@ bool FlutterWindow::OnCreate(std::shared_ptr<FlutterApplicationDescription>appDe
     webos_plugin_interface_ = std::make_unique<WebosInterfaceLoader>();
     webos_plugin_interface_->RegisterPlugins(flutter_view_controller_->engine());
 
+    luna_channel_bridge_ = std::make_unique<LunaChannelBridge>(
+        flutter_view_controller_->engine()->messenger());
+    if (!luna_channel_bridge_->Initialize()) {
+      LOG_WARNING("Failed to initialize Luna channel bridge.");
+      luna_channel_bridge_.reset();
+    }
+
 
     flutter::FlutterView* view = flutter_view_controller_->view();
 
@@ -69,6 +77,9 @@ bool FlutterWindow::OnCreate(std::shared_ptr<FlutterApplicationDescription>appDe
 }
 
 void FlutterWindow::OnDestroy() {
+  if (luna_channel_bridge_) {
+    luna_channel_bridge_.reset();
+  }
   if (flutter_view_controller_) {
     flutter_view_controller_ = nullptr;
   }

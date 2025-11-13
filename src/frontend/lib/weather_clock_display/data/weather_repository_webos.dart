@@ -154,6 +154,7 @@ class WeatherRepositoryWebOS {
         'service': 'luna://com.webos.service.connectionmanager',
         'method': 'getStatus',
         'parameters': {'subscribe': true},
+        'event': 'onConnectionStatusUpdate',
       });
 
       platform.setMethodCallHandler((call) async {

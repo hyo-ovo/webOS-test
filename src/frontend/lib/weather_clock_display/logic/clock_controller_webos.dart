@@ -41,6 +41,7 @@ class ClockControllerWebOS extends ChangeNotifier {
         'service': 'luna://com.webos.service.systemservice',
         'method': 'time/getSystemTime',
         'parameters': {'subscribe': true},
+        'event': 'onTimeUpdate',
       });
 
       _handleTimeResponse(result);

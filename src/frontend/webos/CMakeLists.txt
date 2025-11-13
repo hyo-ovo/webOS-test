@@ -149,13 +149,18 @@ if(BUILD_RUNNER)
     atomic
     ${PMLOG_LIBRARIES}
     ${NYX_LIBRARIES}
+    ${USER_APP_LIBRARIES}
+    ${GLIB_LIBRARIES}
+    ${LS2_LIBRARIES}
+    ${PBNJSON_CPP_LIBRARIES}
   )
 
   target_compile_options(${BINARY_NAME}
     PUBLIC
       ${EGL_CFLAGS}
       ${PBNJSON_CPP_CFLAGS}
-      ${LS2++_CFLAGS}
+      ${GLIB_CFLAGS}
+      ${LS2_CFLAGS}
   )
 
   install(TARGETS ${BINARY_NAME} RUNTIME

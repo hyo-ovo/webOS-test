@@ -6,6 +6,7 @@ set(USER_APP_SRCS
   runner/flutter_embedder_loader.cc
   runner/flutter_launch_params.cc
   runner/flutter_window.cc
+  runner/luna_channel.cc
   runner/logger.cc
   runner/main.cc
   runner/settings.cc
@@ -17,13 +18,20 @@ set(USER_APP_INCLUDE_DIRS
   flutter/ephemeral/include
   ## header file include path for user apps.
   ${CMAKE_CURRENT_BINARY_DIR}/runner
+  ${GLIB_INCLUDE_DIRS}
+  ${LS2_INCLUDE_DIRS}
+  ${PBNJSON_CPP_INCLUDE_DIRS}
 )
 
 set(THIRD_PARTY_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/runner/third_party")
 set(RAPIDJSON_INCLUDE_DIRS "${THIRD_PARTY_DIRS}/rapidjson/include/")
 
 # link libraries for user apps.
-set(USER_APP_LIBRARIES)
+set(USER_APP_LIBRARIES
+  ${GLIB_LIBRARIES}
+  ${LS2_LIBRARIES}
+  ${PBNJSON_CPP_LIBRARIES}
+)
 
 IF(NOT DEFINED SERVICE_NAME)
     set(SERVICE_NAME com.webos.flutter.embedder)

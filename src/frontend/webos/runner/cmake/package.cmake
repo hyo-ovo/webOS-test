@@ -3,11 +3,8 @@ cmake_minimum_required(VERSION 3.10)
 find_package(PkgConfig)
 
 # common libraries.
-#pkg_check_modules(EGL REQUIRED egl)
-
-
-#pkg_check_modules(GLIB REQUIRED glib-2.0)
-#pkg_check_modules(LS2++ REQUIRED luna-service2++>=3)
+pkg_check_modules(GLIB REQUIRED glib-2.0)
+pkg_check_modules(LS2 REQUIRED luna-service2)
 
 pkg_check_modules(PBNJSON_CPP REQUIRED pbnjson_cpp)
 #pkg_check_modules(NYX REQUIRED nyx)

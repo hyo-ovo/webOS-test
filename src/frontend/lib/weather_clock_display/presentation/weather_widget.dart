@@ -16,12 +16,18 @@ class WeatherWidget extends StatefulWidget {
   final String? cityName;
   final Color? textColor;
   final bool showLoading;
+  final double? temperatureFontSize;
+  final double? unitFontSize;
+  final double? conditionFontSize;
 
   const WeatherWidget({
     super.key,
     this.cityName,
     this.textColor,
     this.showLoading = false,
+    this.temperatureFontSize,
+    this.unitFontSize,
+    this.conditionFontSize,
   });
 
   @override
@@ -58,54 +64,51 @@ class _WeatherWidgetState extends State<WeatherWidget> {
           final temperature = weather?.temperature.toInt() ?? 17;
           final condition = weather?.condition ?? 'Clear';
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildWeatherIcon(controller),
-                const SizedBox(width: 12),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          temperature.toString(),
-                          style: GoogleFonts.inter(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w500,
-                            color: widget.textColor ?? const Color(0xFF6B6B6B),
-                            height: 1.0,
-                          ),
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildWeatherIcon(controller),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        temperature.toString(),
+                        style: GoogleFonts.inter(
+                          fontSize: widget.temperatureFontSize ?? 36,
+                          fontWeight: FontWeight.w500,
+                          color: widget.textColor ?? const Color(0xFF6B6B6B),
+                          height: 1.0,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '°C',
-                          style: GoogleFonts.inter(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w400,
-                            color: widget.textColor ?? const Color(0xFF6B6B6B),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      condition,
-                      style: GoogleFonts.inter(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: widget.textColor ?? const Color(0xFF6B6B6B),
                       ),
+                      const SizedBox(width: 3),
+                      Text(
+                        '°C',
+                        style: GoogleFonts.inter(
+                          fontSize: widget.unitFontSize ?? 18,
+                          fontWeight: FontWeight.w400,
+                          color: widget.textColor ?? const Color(0xFF6B6B6B),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    condition,
+                    style: GoogleFonts.inter(
+                      fontSize: widget.conditionFontSize ?? 13,
+                      fontWeight: FontWeight.w400,
+                      color: widget.textColor ?? const Color(0xFF6B6B6B),
                     ),
-                  ],
-                ),
-              ],
-            ),
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),

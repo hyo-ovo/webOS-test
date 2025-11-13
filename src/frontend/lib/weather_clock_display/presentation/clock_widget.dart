@@ -18,11 +18,15 @@ import '../logic/clock_service.dart';
 class ClockWidget extends StatefulWidget {
   final double? width;
   final Color? textColor;
+  final double? fontSize;
+  final double? amPmFontSize;
 
   const ClockWidget({
     super.key,
     this.width,
     this.textColor,
+    this.fontSize,
+    this.amPmFontSize,
   });
 
   @override
@@ -66,19 +70,19 @@ class _ClockWidgetState extends State<ClockWidget> {
           return SizedBox(
             width: widget.width ?? 269,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 2),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   // 시간 표시 (HH:MM)
                   Text(
                     timeString,
                     style: GoogleFonts.inter(
-                      fontSize: 72,
+                      fontSize: widget.fontSize ?? 72,
                       fontWeight: FontWeight.w400, // Regular
                       color: widget.textColor ?? const Color(0xFF6B6B6B),
-                      height: 90 / 72, // lineHeight / fontSize
+                      height: 90 / (widget.fontSize ?? 72),
                       letterSpacing: 0.123,
                     ),
                   ),
@@ -87,10 +91,10 @@ class _ClockWidgetState extends State<ClockWidget> {
                   Text(
                     amPm,
                     style: GoogleFonts.inter(
-                      fontSize: 36,
+                      fontSize: widget.amPmFontSize ?? 36,
                       fontWeight: FontWeight.w400, // Regular
                       color: widget.textColor ?? const Color(0xFF6B6B6B),
-                      height: 90 / 36, // lineHeight / fontSize
+                      height: 90 / (widget.amPmFontSize ?? 36),
                     ),
                   ),
                 ],

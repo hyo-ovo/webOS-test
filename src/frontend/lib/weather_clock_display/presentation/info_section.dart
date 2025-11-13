@@ -30,30 +30,34 @@ class InfoSection extends StatelessWidget {
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // 1. 시간 표시
-        ClockWidget(
-          width: 269,
-          textColor: primaryColor,
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerRight,
+            child: ClockWidget(
+              width: 220,
+              textColor: primaryColor,
+              fontSize: 60,
+              amPmFontSize: 24,
+            ),
+          ),
         ),
-
-        const SizedBox(width: 35), // gap
-
-        // 2. 구분선 (세로)
-        Container(
-          width: 1,
-          height: 71,
-          color: divColor,
-        ),
-
-        const SizedBox(width: 35), // gap
-
-        // 3. 날씨 표시
-        WeatherWidget(
-          cityName: cityName,
-          textColor: primaryColor,
-          showLoading: showWeatherLoading,
+        const SizedBox(width: 28),
+        Container(width: 1, height: 64, color: divColor),
+        const SizedBox(width: 28),
+        Expanded(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: WeatherWidget(
+              cityName: cityName,
+              textColor: primaryColor,
+              showLoading: showWeatherLoading,
+              temperatureFontSize: 40,
+              unitFontSize: 18,
+              conditionFontSize: 14,
+            ),
+          ),
         ),
       ],
     );

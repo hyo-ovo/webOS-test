@@ -39,7 +39,13 @@ class _WebOSMediaService extends MediaService {
         'parameters': parameters,
         'onSuccess': js.allowInterop((dynamic res) {
           final sessionId = js_util.getProperty(res, 'sessionId');
-          completer.complete(sessionId is String ? sessionId : null);
+          final id = sessionId is String ? sessionId : null;
+          if (id != null) {
+            debugPrint('[media] open success: sessionId=$id');
+          } else {
+            debugPrint('[media] open returned without sessionId');
+          }
+          completer.complete(id);
         }),
         'onFailure': js.allowInterop((dynamic error) {
           final code = js_util.hasProperty(error, 'errorCode')
@@ -93,6 +99,7 @@ class _WebOSMediaService extends MediaService {
       })
     ]);
 
+    debugPrint('[media] $method request sent for sessionId=$sessionId');
     return Future.value();
   }
 }

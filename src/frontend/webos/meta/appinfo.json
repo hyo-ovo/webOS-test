@@ -22,6 +22,8 @@
         "applications",
         "applications.launcher",
         "applications.operation",
+        "media",
+        "mediacontrol",
         "settings",
         "system"
     ],

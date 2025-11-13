@@ -8,46 +8,37 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F8),
+      backgroundColor: const Color(0xFFF6F7FB),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(40, 28, 40, 32),
+          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 30),
           child: Column(
             children: [
               const _TopStatusBar(),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               Expanded(
                 child: Column(
                   children: [
                     Expanded(
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Row(
-                            children: const [
-                              Expanded(
-                                flex: 5,
-                                child: _HeroMediaCard(
-                                  videoUrl:
-                                      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-                                ),
-                              ),
-                              SizedBox(width: 32),
-                              Expanded(
-                                flex: 4,
-                                child: _SideColumn(),
-                              ),
-                            ],
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: const [
+                          Expanded(
+                            flex: 7,
+                            child: _HeroSpotlight(
+                              videoUrl:
+                                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                            ),
                           ),
-                          const Positioned(
-                            top: 56,
-                            right: -28,
-                            child: _VerticalBadge(label: '빈버드'),
+                          SizedBox(width: 32),
+                          Expanded(
+                            flex: 5,
+                            child: _MemoBoardWithBadge(),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 36),
                     const _AppDock(),
                   ],
                 ),
@@ -238,23 +229,32 @@ class _ProfileSummary extends StatelessWidget {
   }
 }
 
-class _HeroMediaCard extends StatelessWidget {
-  const _HeroMediaCard({required this.videoUrl});
+class _HeroSpotlight extends StatefulWidget {
+  const _HeroSpotlight({required this.videoUrl});
 
   final String videoUrl;
 
   @override
+  State<_HeroSpotlight> createState() => _HeroSpotlightState();
+}
+
+class _HeroSpotlightState extends State<_HeroSpotlight> {
+  int _volume = 15;
+  bool _muted = false;
+  bool _loading = false;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(36),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 32,
-            offset: const Offset(0, 24),
+            blurRadius: 34,
+            offset: const Offset(0, 28),
           ),
         ],
       ),
@@ -262,20 +262,52 @@ class _HeroMediaCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 5,
+            flex: 6,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(24),
-              child: CustomVideoWidget(
-                videoUrl: videoUrl,
-                autoplay: true,
-                looping: true,
-                volume: 0.0,
+              borderRadius: BorderRadius.circular(28),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: CustomVideoWidget(
+                      videoUrl: widget.videoUrl,
+                      autoplay: true,
+                      looping: true,
+                      volume: 0.0,
+                    ),
+                  ),
+                  Positioned.fill(
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerRight,
+                          end: Alignment.centerLeft,
+                          colors: [
+                            Colors.black.withValues(alpha: 0.55),
+                            Colors.black.withValues(alpha: 0.2),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    left: 24,
+                    child: _VolumeControllerBar(
+                      volume: _volume,
+                      muted: _muted,
+                      loading: _loading,
+                      onVolumeChange: _changeVolume,
+                      onToggleMute: _toggleMute,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 28),
+          const SizedBox(width: 30),
           Expanded(
-            flex: 4,
+            flex: 5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
@@ -283,27 +315,27 @@ class _HeroMediaCard extends StatelessWidget {
                 Text(
                   'THE GENTLEMEN',
                   style: TextStyle(
-                    fontSize: 26,
+                    fontSize: 28,
                     fontWeight: FontWeight.w800,
-                    color: Color(0xFF1E1F25),
+                    color: Color(0xFF181A21),
                   ),
                 ),
-                SizedBox(height: 14),
+                SizedBox(height: 18),
                 Text(
                   'An American expat tries to sell off his highly profitable marijuana '
                   'empire in London, triggering plots, schemes, bribery and blackmail in '
                   'an attempt to steal his domain out from under him.',
                   style: TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                    color: Color(0xFF4D515E),
+                    fontSize: 15,
+                    height: 1.7,
+                    color: Color(0xFF4C505C),
                   ),
                 ),
-                SizedBox(height: 28),
+                SizedBox(height: 30),
                 _WatchNowButton(),
-                SizedBox(height: 32),
+                SizedBox(height: 34),
                 Wrap(
-                  spacing: 12,
+                  spacing: 14,
                   runSpacing: 12,
                   children: [
                     _TagChip(label: '액션'),
@@ -311,18 +343,131 @@ class _HeroMediaCard extends StatelessWidget {
                     _TagChip(label: '영국'),
                   ],
                 ),
-                SizedBox(height: 16),
-                Text(
-                  '자동 재생 중인 예고편의 볼륨은 우측 컨트롤러에서 조절할 수 있어요.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF818796),
-                  ),
-                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> _changeVolume(bool increase) async {
+    setState(() => _loading = true);
+    final bool success = increase
+        ? await volumeService.volumeUp()
+        : await volumeService.volumeDown();
+    if (!mounted) {
+      return;
+    }
+    if (success) {
+      setState(() {
+        _muted = false;
+        _volume = (increase ? _volume + 1 : _volume - 1).clamp(0, 100).toInt();
+      });
+    } else {
+      _showMessage('볼륨을 변경하지 못했어요.');
+    }
+    setState(() => _loading = false);
+  }
+
+  Future<void> _toggleMute() async {
+    setState(() => _loading = true);
+    final bool success = await volumeService.setMuted(!_muted);
+    if (!mounted) {
+      return;
+    }
+    if (success) {
+      setState(() => _muted = !_muted);
+    } else {
+      _showMessage('음소거 상태를 변경하지 못했어요.');
+    }
+    setState(() => _loading = false);
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+}
+
+class _VolumeControllerBar extends StatelessWidget {
+  const _VolumeControllerBar({
+    required this.volume,
+    required this.muted,
+    required this.loading,
+    required this.onVolumeChange,
+    required this.onToggleMute,
+  });
+
+  final int volume;
+  final bool muted;
+  final bool loading;
+  final Future<void> Function(bool increase) onVolumeChange;
+  final Future<void> Function() onToggleMute;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        child: Row(
+          children: [
+            _circleButton(
+              icon: Icons.remove_rounded,
+              onTap: loading ? null : () => onVolumeChange(false),
+            ),
+            const SizedBox(width: 12),
+            _circleButton(
+              icon: muted ? Icons.volume_off_rounded : Icons.volume_mute_rounded,
+              onTap: loading ? null : onToggleMute,
+            ),
+            const SizedBox(width: 12),
+            _circleButton(
+              icon: Icons.add_rounded,
+              onTap: loading ? null : () => onVolumeChange(true),
+            ),
+            const SizedBox(width: 16),
+            Text(
+              muted ? '음소거됨' : '볼륨 $volume',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            if (loading) ...[
+              const SizedBox(width: 12),
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _circleButton({required IconData icon, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withValues(alpha: onTap == null ? 0.25 : 0.4),
+        ),
+        child: Icon(icon, size: 20, color: Colors.white),
       ),
     );
   }
@@ -338,29 +483,31 @@ class _WatchNowButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: const Color(0xFFE53935),
         foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
         ),
+        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
       ),
-      child: const Text(
-        '지금 보러가기',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-      ),
+      child: const Text('지금 보러가기'),
     );
   }
 }
 
-class _SideColumn extends StatelessWidget {
-  const _SideColumn();
+class _MemoBoardWithBadge extends StatelessWidget {
+  const _MemoBoardWithBadge();
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Stack(
+      clipBehavior: Clip.none,
       children: const [
-        Expanded(child: _MemoBoard()),
-        SizedBox(height: 24),
-        _VolumeQuickPanel(),
+        _MemoBoard(),
+        Positioned(
+          top: 46,
+          right: -30,
+          child: _VerticalBadge(label: '빈버드'),
+        ),
       ],
     );
   }
@@ -431,8 +578,8 @@ class _MemoBoard extends StatelessWidget {
               children: [
                 Expanded(
                   child: _MemoSticky(
-                    title: '할일 정리',
-                    content: '이벤트 준비\n장보기',
+                    title: '할일 메모',
+                    content: '할일 정기 어쩌구',
                     color: Color(0xFF6DE4A5),
                   ),
                 ),
@@ -440,7 +587,7 @@ class _MemoBoard extends StatelessWidget {
                 Expanded(
                   child: _MemoSticky(
                     title: '아이디어',
-                    content: '홈 디자인 스케치',
+                    content: '',
                     color: Color(0xFFFFE28B),
                   ),
                 ),
@@ -503,149 +650,6 @@ class _MemoSticky extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _VolumeQuickPanel extends StatefulWidget {
-  const _VolumeQuickPanel();
-
-  @override
-  State<_VolumeQuickPanel> createState() => _VolumeQuickPanelState();
-}
-
-class _VolumeQuickPanelState extends State<_VolumeQuickPanel> {
-  int _volume = 15;
-  bool _muted = false;
-  bool _loading = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 120,
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E2533),
-        borderRadius: BorderRadius.circular(30),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 18),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.volume_up_rounded, color: Colors.white),
-          ),
-          const SizedBox(width: 18),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _muted ? '음소거됨' : '볼륨 $_volume',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                LinearProgressIndicator(
-                  value: _muted ? 0 : _volume / 100,
-                  backgroundColor: Colors.white.withValues(alpha: 0.15),
-                  color: Colors.white,
-                  minHeight: 4,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 18),
-          Row(
-            children: [
-              _roundIconButton(
-                icon: Icons.remove_rounded,
-                onTap: _loading ? null : () => _changeVolume(false),
-              ),
-              const SizedBox(width: 10),
-              _roundIconButton(
-                icon: Icons.add_rounded,
-                onTap: _loading ? null : () => _changeVolume(true),
-              ),
-              const SizedBox(width: 14),
-              _roundIconButton(
-                icon: _muted ? Icons.volume_off_rounded : Icons.volume_mute_rounded,
-                onTap: _loading ? null : _toggleMute,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _roundIconButton({required IconData icon, VoidCallback? onTap}) {
-    return Material(
-      color: Colors.white.withValues(alpha: onTap == null ? 0.08 : 0.18),
-      shape: const CircleBorder(),
-      child: InkWell(
-        onTap: onTap,
-        customBorder: const CircleBorder(),
-        child: SizedBox(
-          width: 42,
-          height: 42,
-          child: Icon(icon, color: Colors.white),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _changeVolume(bool increase) async {
-    setState(() => _loading = true);
-    final bool success = increase
-        ? await volumeService.volumeUp()
-        : await volumeService.volumeDown();
-    if (!mounted) {
-      return;
-    }
-    if (success) {
-      setState(() {
-        _muted = false;
-        _volume = (increase ? _volume + 1 : _volume - 1).clamp(0, 100).toInt();
-      });
-    } else {
-      _showMessage('볼륨을 변경하지 못했어요.');
-    }
-    setState(() => _loading = false);
-  }
-
-  Future<void> _toggleMute() async {
-    setState(() => _loading = true);
-    final bool success = await volumeService.setMuted(!_muted);
-    if (!mounted) {
-      return;
-    }
-    if (success) {
-      setState(() => _muted = !_muted);
-    } else {
-      _showMessage('음소거 상태를 변경하지 못했어요.');
-    }
-    setState(() => _loading = false);
-  }
-
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
     );
   }
 }
@@ -759,8 +763,15 @@ class _DockIcon extends StatelessWidget {
           width: 68,
           height: 68,
           decoration: BoxDecoration(
-            color: item.color.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                item.color.withValues(alpha: 0.18),
+                item.color.withValues(alpha: 0.32),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(22),
           ),
           child: Icon(item.icon, size: 32, color: item.color),
         ),

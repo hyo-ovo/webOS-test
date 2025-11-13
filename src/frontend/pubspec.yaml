@@ -36,6 +36,18 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
 
+  # HTTP client for API requests
+  http: ^1.1.0
+
+  # State management
+  provider: ^6.1.0
+
+  # For locale and intl (날씨 번역 등)
+  intl: ^0.19.0
+
+  # Google fonts (Inter font)
+  google_fonts: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

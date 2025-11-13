@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'features/app_manager/presentation/widgets/app_launcher_widget.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -84,6 +85,12 @@ class _SplashHomeState extends State<SplashHome>
                 ),
               ),
               const SizedBox(height: 40),
+              // 앱 런처 위젯 추가
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: AppLauncherWidget(),
+              ),
+              const SizedBox(height: 20),
               AnimatedContainer(
                 duration: const Duration(seconds: 1),
                 width: _opacity * 100 + 50,

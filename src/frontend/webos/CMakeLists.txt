@@ -149,6 +149,7 @@ if(BUILD_RUNNER)
     atomic
     ${PMLOG_LIBRARIES}
     ${NYX_LIBRARIES}
+    flutter
     ${USER_APP_LIBRARIES}
     ${GLIB_LIBRARIES}
     ${LS2_LIBRARIES}

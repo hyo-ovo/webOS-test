@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:js' as js;
-import 'dart:js_util' as js_util;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'media_service_interface.dart';
 
@@ -11,15 +10,38 @@ MediaService getMediaService() => const _WebOSMediaService();
 class _WebOSMediaService extends MediaService {
   const _WebOSMediaService();
 
-  @override
-  Future<String?> open(String uri, {Map<String, dynamic>? options}) {
-    if (!_hasWebOS) {
-      debugPrint('[media] webOS object not available');
-      return Future.value(null);
-    }
+  static const MethodChannel _channel = MethodChannel('com.lg.homescreen/luna');
+  static const String _mediaServiceUri = 'luna://com.webos.media';
 
-    final completer = Completer<String?>();
-    final service = js_util.getProperty(_webOS!, 'service');
+  Future<Map<String, dynamic>?> _callLuna(
+    String method, {
+    Map<String, dynamic>? parameters,
+  }) async {
+    try {
+      final result = await _channel.invokeMethod<dynamic>('callLunaService', {
+        'service': _mediaServiceUri,
+        'method': method,
+        'parameters': parameters ?? const <String, dynamic>{},
+      });
+
+      if (result is Map) {
+        return result.cast<String, dynamic>();
+      }
+
+      debugPrint('[media] $_mediaServiceUri/$method unexpected response: $result');
+      return null;
+    } on MissingPluginException catch (error) {
+      debugPrint('[media] luna channel missing: $error');
+      return null;
+    } catch (error, stackTrace) {
+      debugPrint('[media] $_mediaServiceUri/$method error: $error');
+      debugPrint('$stackTrace');
+      return null;
+    }
+  }
+
+  @override
+  Future<String?> open(String uri, {Map<String, dynamic>? options}) async {
     final parameters = <String, dynamic>{
       'uri': uri,
       'type': 'media',
@@ -28,39 +50,30 @@ class _WebOSMediaService extends MediaService {
         'mediaTransportType': uri.startsWith('http') ? 'STREAMING' : 'FILE',
       },
     };
+
     if (options != null) {
       parameters.addAll(options);
     }
 
-    js_util.callMethod(service, 'request', [
-      'luna://com.webos.media',
-      js_util.jsify({
-        'method': 'open',
-        'parameters': parameters,
-        'onSuccess': js.allowInterop((dynamic res) {
-          final sessionId = js_util.getProperty(res, 'sessionId');
-          final id = sessionId is String ? sessionId : null;
-          if (id != null) {
-            debugPrint('[media] open success: sessionId=$id');
-          } else {
-            debugPrint('[media] open returned without sessionId');
-          }
-          completer.complete(id);
-        }),
-        'onFailure': js.allowInterop((dynamic error) {
-          final code = js_util.hasProperty(error, 'errorCode')
-              ? js_util.getProperty(error, 'errorCode')
-              : 'unknown';
-          final text = js_util.hasProperty(error, 'errorText')
-              ? js_util.getProperty(error, 'errorText')
-              : 'unknown';
-          debugPrint('[media] open failed: [$code] $text');
-          completer.complete(null);
-        }),
-      })
-    ]);
+    final response = await _callLuna('open', parameters: parameters);
 
-    return completer.future;
+    if (response == null) {
+      return null;
+    }
+
+    final success = response['returnValue'] == true;
+    final sessionId = response['sessionId'];
+
+    if (success && sessionId is String && sessionId.isNotEmpty) {
+      debugPrint('[media] open success: sessionId=$sessionId');
+      return sessionId;
+    }
+
+    final errorCode =
+        response['errorCode'] ?? response['errorCodeValue'] ?? 'unknown';
+    final errorText = response['errorText'] ?? 'unknown';
+    debugPrint('[media] open failed: [$errorCode] $errorText');
+    return null;
   }
 
   @override
@@ -75,35 +88,25 @@ class _WebOSMediaService extends MediaService {
   @override
   Future<void> close(String sessionId) => _invokeSimple('close', sessionId);
 
-  Future<void> _invokeSimple(String method, String sessionId) {
-    if (!_hasWebOS) {
-      debugPrint('[media] $method skipped, webOS unavailable');
-      return Future.value();
+  Future<void> _invokeSimple(String method, String sessionId) async {
+    final response = await _callLuna(
+      method,
+      parameters: {'sessionId': sessionId},
+    );
+
+    if (response == null) {
+      debugPrint('[media] $method no response');
+      return;
     }
 
-    final service = js_util.getProperty(_webOS!, 'service');
-    js_util.callMethod(service, 'request', [
-      'luna://com.webos.media',
-      js_util.jsify({
-        'method': method,
-        'parameters': {'sessionId': sessionId},
-        'onFailure': js.allowInterop((dynamic error) {
-          final code = js_util.hasProperty(error, 'errorCode')
-              ? js_util.getProperty(error, 'errorCode')
-              : 'unknown';
-          final text = js_util.hasProperty(error, 'errorText')
-              ? js_util.getProperty(error, 'errorText')
-              : 'unknown';
-          debugPrint('[media] $method failed: [$code] $text');
-        }),
-      })
-    ]);
+    if (response['returnValue'] == true) {
+      debugPrint('[media] $method success for sessionId=$sessionId');
+      return;
+    }
 
-    debugPrint('[media] $method request sent for sessionId=$sessionId');
-    return Future.value();
+    final errorCode =
+        response['errorCode'] ?? response['errorCodeValue'] ?? 'unknown';
+    final errorText = response['errorText'] ?? 'unknown';
+    debugPrint('[media] $method failed: [$errorCode] $errorText');
   }
 }
-
-Object? get _webOS => js.context.hasProperty('webOS') ? js.context['webOS'] : null;
-
-bool get _hasWebOS => _webOS != null;

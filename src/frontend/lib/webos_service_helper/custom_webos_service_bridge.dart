@@ -43,7 +43,11 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
       final completer = Completer<Map<String, dynamic>?>();
       StreamSubscription<Map<String, dynamic>>? subscription;
       
-      subscription = bridgeInstance.subscribe().listen(
+      debugPrint('[CustomWebOSServiceBridge] subscribe() 호출 전');
+      final stream = bridgeInstance.subscribe();
+      debugPrint('[CustomWebOSServiceBridge] subscribe() 스트림 획득');
+      
+      subscription = stream.listen(
         (response) {
           debugPrint('[CustomWebOSServiceBridge] subscribe 응답: $response');
           if (!completer.isCompleted) {
@@ -54,6 +58,7 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
         },
         onError: (error) {
           debugPrint('[CustomWebOSServiceBridge] subscribe 에러: $error');
+          debugPrint('[CustomWebOSServiceBridge] 에러 타입: ${error.runtimeType}');
           if (!completer.isCompleted) {
             completer.completeError(error);
             subscription?.cancel();
@@ -61,13 +66,16 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
           }
         },
         onDone: () {
-          debugPrint('[CustomWebOSServiceBridge] subscribe 완료');
+          debugPrint('[CustomWebOSServiceBridge] subscribe 완료 (onDone)');
           if (!completer.isCompleted) {
+            debugPrint('[CustomWebOSServiceBridge] completer가 완료되지 않았으므로 null 반환');
             completer.complete(null);
           }
         },
         cancelOnError: false,
       );
+      
+      debugPrint('[CustomWebOSServiceBridge] subscribe listen 완료, 응답 대기 중...');
       
       // 타임아웃 추가 (30초)
       final result = await completer.future.timeout(

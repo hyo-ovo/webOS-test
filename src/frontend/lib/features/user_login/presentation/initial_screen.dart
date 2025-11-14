@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../logic/auth_controller.dart';
+import '../data/user_model.dart';
 import 'account_selection_screen.dart';
 import 'register_screen.dart';
 

@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:webos_service_bridge/webos_service_bridge.dart';
 
@@ -27,8 +27,21 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
 
   final WebOSServiceBridge _webOSServiceBridge;
 
-  static Future<Map<String, dynamic>?> callOneReply(WebOSServiceData request) =>
-      WebOSServiceBridge.callOneReply(request);
+  static Future<Map<String, dynamic>?> callOneReply(WebOSServiceData request) async {
+    debugPrint('[CustomWebOSServiceBridge] callOneReply 시작');
+    debugPrint('[CustomWebOSServiceBridge] URI: ${request.uri}');
+    debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
+    
+    try {
+      final result = await WebOSServiceBridge.callOneReply(request);
+      debugPrint('[CustomWebOSServiceBridge] callOneReply 완료: $result');
+      return result;
+    } catch (e, stackTrace) {
+      debugPrint('[CustomWebOSServiceBridge] callOneReply 에러: $e');
+      debugPrint('[CustomWebOSServiceBridge] 스택 트레이스: $stackTrace');
+      rethrow;
+    }
+  }
 
   @override
   Stream<Map<String, dynamic>> subscribe() => _webOSServiceBridge.subscribe();

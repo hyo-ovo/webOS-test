@@ -129,12 +129,30 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
             // 비디오 플레이어 또는 썸네일
             if (_controller != null && _controller!.value.isInitialized)
               Positioned.fill(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: AspectRatio(
-                    aspectRatio: _controller!.value.aspectRatio,
-                    child: VideoPlayer(_controller!),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final aspectRatio = _controller!.value.aspectRatio;
+                    final maxWidth = constraints.maxWidth;
+                    final maxHeight = constraints.maxHeight;
+                    
+                    // 비디오가 영역을 채우도록 크기 계산 (BoxFit.cover 방식)
+                    double width = maxWidth;
+                    double height = width / aspectRatio;
+                    
+                    if (height < maxHeight) {
+                      height = maxHeight;
+                      width = height * aspectRatio;
+                    }
+                    
+                    return FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: width,
+                        height: height,
+                        child: VideoPlayer(_controller!),
+                      ),
+                    );
+                  },
                 ),
               )
             else

@@ -54,7 +54,7 @@ Future<Map<String, dynamic>?> callOneReply({
   // URI와 method를 분리하여 전달
   final fullPayload = <String, dynamic>{
     'method': method,
-    ...payload,
+    if (payload != null) ...payload,
   };
   
   final WebOSServiceData serviceData = WebOSServiceData(uri,

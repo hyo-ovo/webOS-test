@@ -92,16 +92,7 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
   void _videoListener() {
     if (_controller == null) return;
     
-    // 비디오 상태 로깅
-    final value = _controller!.value;
-    debugPrint('[CustomVideoWidget] 비디오 상태:');
-    debugPrint('  - isInitialized: ${value.isInitialized}');
-    debugPrint('  - isPlaying: ${value.isPlaying}');
-    debugPrint('  - aspectRatio: ${value.aspectRatio}');
-    debugPrint('  - duration: ${value.duration}');
-    debugPrint('  - position: ${value.position}');
-    
-    // 비디오 상태 변화 시 UI 업데이트
+    // 비디오 상태 변화 시 UI 업데이트만 수행 (로깅 제거)
     if (mounted) {
       setState(() {
         // 상태 변화를 감지하여 UI 업데이트
@@ -118,46 +109,51 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final double targetWidth = widget.width ?? MediaQuery.of(context).size.width;
-    final double targetHeight = widget.height ?? targetWidth / (16 / 9);
-
-    return SizedBox(
-      width: targetWidth,
-      height: targetHeight,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // 비디오 플레이어 또는 썸네일
-            if (_controller != null && _controller!.value.isInitialized)
-              Positioned.fill(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final aspectRatio = _controller!.value.aspectRatio;
-                    final maxWidth = constraints.maxWidth;
-                    final maxHeight = constraints.maxHeight;
-                    
-                    // 비디오가 영역을 채우도록 크기 계산 (BoxFit.cover 방식)
-                    double width = maxWidth;
-                    double height = width / aspectRatio;
-                    
-                    if (height < maxHeight) {
-                      height = maxHeight;
-                      width = height * aspectRatio;
-                    }
-                    
-                    return FittedBox(
-                      fit: BoxFit.cover,
-                      child: SizedBox(
-                        width: width,
-                        height: height,
-                        child: VideoPlayer(_controller!),
-                      ),
-                    );
-                  },
-                ),
-              )
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 사용 가능한 크기 사용 (width/height가 지정되면 사용, 아니면 제약 조건 사용)
+        final double targetWidth = widget.width ?? constraints.maxWidth;
+        final double targetHeight = widget.height ?? constraints.maxHeight;
+        
+        return SizedBox(
+          width: targetWidth.isFinite ? targetWidth : constraints.maxWidth,
+          height: targetHeight.isFinite ? targetHeight : constraints.maxHeight,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(24),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // 비디오 플레이어 또는 썸네일
+                if (_controller != null && _controller!.value.isInitialized)
+                  Positioned.fill(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final aspectRatio = _controller!.value.aspectRatio;
+                        final maxWidth = constraints.maxWidth;
+                        final maxHeight = constraints.maxHeight;
+                        
+                        // 비디오가 영역을 채우도록 크기 계산 (BoxFit.cover 방식)
+                        double width = maxWidth;
+                        double height = width / aspectRatio;
+                        
+                        if (height < maxHeight) {
+                          height = maxHeight;
+                          width = height * aspectRatio;
+                        }
+                        
+                        return Center(
+                          child: SizedBox(
+                            width: width,
+                            height: height,
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: VideoPlayer(_controller!),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
             else
               Container(
                 color: Colors.black.withOpacity(0.2),
@@ -174,23 +170,7 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
                         ),
                       ),
               ),
-            // 그라데이션 오버레이 (비디오가 있을 때만 표시, 투명도 낮춤)
-            if (_controller != null && _controller!.value.isInitialized)
-              Positioned.fill(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withOpacity(0.1),
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.15),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+            // 그라데이션 오버레이 제거 (비디오가 잘 보이도록)
             // 로딩 또는 에러 메시지
             if (_isInitializing)
               const Center(
@@ -253,6 +233,8 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
           ],
         ),
       ),
+    );
+      },
     );
   }
 }

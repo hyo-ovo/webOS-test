@@ -105,9 +105,6 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
 
   @override
   Widget build(BuildContext context) {
-    final double videoWidth = MediaQuery.of(context).size.width;
-    final double videoHeight = videoWidth / (16 / 9);
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
       decoration: BoxDecoration(
@@ -127,8 +124,6 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
           Expanded(
             flex: 6,
             child: CustomVideoWidget(
-              width: videoWidth,
-              height: videoHeight,
               onPlay: null,
               caption: _openingMedia ? '재생 준비 중...' : null,
               videoUrl: widget.videoUrl,

@@ -5,6 +5,63 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:webos_service_bridge/webos_service_bridge.dart';
 
+// 직접 MethodChannel을 사용하는 대안 구현
+class DirectLunaServiceBridge {
+  static const MethodChannel _channel = MethodChannel('com.webos.service');
+  
+  static Future<Map<String, dynamic>?> callOneReply({
+    required String uri,
+    required String method,
+    Map<String, dynamic>? payload = const <String, dynamic>{},
+  }) async {
+    try {
+      debugPrint('[DirectLunaServiceBridge] 직접 MethodChannel 호출');
+      debugPrint('[DirectLunaServiceBridge] URI: $uri');
+      debugPrint('[DirectLunaServiceBridge] Method: $method');
+      debugPrint('[DirectLunaServiceBridge] Payload: $payload');
+      
+      final fullPayload = <String, dynamic>{
+        'method': method,
+        if (payload != null) ...payload,
+      };
+      
+      final result = await _channel.invokeMethod<Map<Object?, Object?>>(
+        'call',
+        {
+          'uri': uri,
+          'parameters': fullPayload,
+        },
+      );
+      
+      if (result != null) {
+        final response = Map<String, dynamic>.from(
+          result.map((key, value) => MapEntry(key.toString(), value)),
+        );
+        debugPrint('[DirectLunaServiceBridge] 응답: $response');
+        return response;
+      }
+      
+      debugPrint('[DirectLunaServiceBridge] 응답이 null입니다');
+      return null;
+    } on PlatformException catch (e) {
+      debugPrint('[DirectLunaServiceBridge] PlatformException: ${e.code} - ${e.message}');
+      return {
+        'returnValue': false,
+        'errorCode': -1,
+        'errorText': 'PlatformException: ${e.message}',
+      };
+    } catch (e, stackTrace) {
+      debugPrint('[DirectLunaServiceBridge] 에러: $e');
+      debugPrint('[DirectLunaServiceBridge] 스택 트레이스: $stackTrace');
+      return {
+        'returnValue': false,
+        'errorCode': -1,
+        'errorText': 'Exception: $e',
+      };
+    }
+  }
+}
+
 int generateHashCode(WebOSServiceData serviceData) =>
     '${serviceData.uri}${serviceData.payload}'.hashCode;
 
@@ -31,6 +88,29 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] callOneReply 시작');
     debugPrint('[CustomWebOSServiceBridge] URI: ${request.uri}');
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
+    
+    // 먼저 직접 MethodChannel 방식 시도
+    final method = request.payload['method'] as String? ?? '';
+    final payloadWithoutMethod = <String, dynamic>{...request.payload};
+    payloadWithoutMethod.remove('method');
+    
+    debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 방식 시도');
+    final directResult = await DirectLunaServiceBridge.callOneReply(
+      uri: request.uri,
+      method: method,
+      payload: payloadWithoutMethod.isEmpty ? null : payloadWithoutMethod,
+    );
+    
+    // 직접 MethodChannel이 성공하면 반환
+    if (directResult != null && 
+        (directResult['returnValue'] == true || 
+         directResult['errorCode'] != null)) {
+      debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 성공');
+      return directResult;
+    }
+    
+    // 직접 MethodChannel이 실패하면 기존 플러그인 방식 시도
+    debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 실패, 플러그인 방식 시도');
     
     try {
       // CustomWebOSServiceBridge 인스턴스를 생성하여 subscribe 방식 사용

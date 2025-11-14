@@ -51,9 +51,11 @@ class MockWebOSServiceBridge implements WebOSServiceBridgeBase {
   static Future<Map<String, dynamic>> callOneReply(
       WebOSServiceData request) async {
     // Read the mock response from a local file
-
+    // Mock 파일 경로: URI + method (payload에서 추출)
+    final method = request.payload['method'] as String? ?? '';
     final String uriPath = request.uri.replaceFirst('luna://', '');
-    String path = 'mocks/$uriPath-${generateHashCode(request)}.json';
+    final String mockPath = method.isNotEmpty ? '$uriPath/$method' : uriPath;
+    String path = 'mocks/$mockPath-${generateHashCode(request)}.json';
     if (!kIsWeb) {
       path = 'assets/$path';
     }
@@ -83,8 +85,11 @@ class MockWebOSServiceBridge implements WebOSServiceBridgeBase {
   @override
   Stream<Map<String, dynamic>> subscribe() async* {
     // Read the mock response from a local file
+    // Mock 파일 경로: URI + method (payload에서 추출)
+    final method = _serviceData.payload['method'] as String? ?? '';
     final String uriPath = _serviceData.uri.replaceFirst('luna://', '');
-    String path = 'mocks/$uriPath-${generateHashCode(_serviceData)}.json';
+    final String mockPath = method.isNotEmpty ? '$uriPath/$method' : uriPath;
+    String path = 'mocks/$mockPath-${generateHashCode(_serviceData)}.json';
     if (!kIsWeb) {
       path = 'assets/$path';
     }

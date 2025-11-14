@@ -11,8 +11,14 @@ int subscribe({
   void Function()? onDone,
   bool cancelOnError = false,
 }) {
-  final WebOSServiceData serviceData = WebOSServiceData('$uri/$method',
-      payload: payload, optHashCode: defaultHashCode);
+  // WebOSServiceBridge 플러그인은 URI만 받고, method는 payload에 포함해야 할 수 있음
+  final fullPayload = <String, dynamic>{
+    'method': method,
+    if (payload != null) ...payload,
+  };
+  
+  final WebOSServiceData serviceData = WebOSServiceData(uri,
+      payload: fullPayload, optHashCode: defaultHashCode);
   final int hashCode = generateHashCode(serviceData);
   BridgeService? service = ServiceManager.instance.get(hashCode);
   if (service == null) {
@@ -44,8 +50,15 @@ Future<Map<String, dynamic>?> callOneReply({
   required String method,
   Map<String, dynamic>? payload = const <String, dynamic>{},
 }) async {
-  final WebOSServiceData serviceData = WebOSServiceData('$uri/$method',
-      payload: payload, optHashCode: defaultHashCode);
+  // WebOSServiceBridge 플러그인은 URI만 받고, method는 payload에 포함해야 할 수 있음
+  // URI와 method를 분리하여 전달
+  final fullPayload = <String, dynamic>{
+    'method': method,
+    ...payload,
+  };
+  
+  final WebOSServiceData serviceData = WebOSServiceData(uri,
+      payload: fullPayload, optHashCode: defaultHashCode);
   return useMock
       ? MockWebOSServiceBridge.callOneReply(serviceData)
       : CustomWebOSServiceBridge.callOneReply(serviceData);

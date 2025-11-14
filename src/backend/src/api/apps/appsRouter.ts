@@ -28,10 +28,10 @@ const UpdateAppOrderRequestSchema = z.object({
     .min(1, "apps 배열은 최소 1개 이상의 요소가 필요합니다"),
 });
 
-// GET /me/apps
+// GET /apps
 appsRegistry.registerPath({
   method: "get",
-  path: "/me/apps",
+  path: "/apps",
   tags: ["Apps"],
   summary: "Get user's app list with order",
   security: [{ bearerAuth: [] }],
@@ -41,10 +41,10 @@ appsRegistry.registerPath({
   ),
 });
 
-// PUT /me/apps/order
+// PUT /apps/order
 appsRegistry.registerPath({
   method: "put",
-  path: "/me/apps/order",
+  path: "/apps/order",
   tags: ["Apps"],
   summary: "Update user's app order",
   description:

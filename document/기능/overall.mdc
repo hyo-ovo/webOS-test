@@ -22,9 +22,9 @@ alwaysApply: true
   - 사용자 계정 로그인
   - 시계 / 날씨 표시
 - 선택 / 심화 기능
-  - 얼굴 인식 로그인
-  - 캐릭터 ‘빈버드’ 인터렉션
-  - 메모장 기능
+  - 메모장 기능 (Phase 1)
+  - 얼굴 인식 로그인 (Phase 2)
+  - 캐릭터 ‘빈버드’ 인터렉션 (Phase 2)
 - 비기능 요구사항
   - CPU 사용률 30% 이하
   - Memory Leak 없음
@@ -34,8 +34,7 @@ alwaysApply: true
 - **Frontend**: Flutter
 - **Backend**: Express
 - **Database**: PostgreSQL
-- **AI / vision**: webRTC
-- **Infra**: AWS EC2
-- **CICD**: Jenkins, Docker
+- **Infra**: Fly.io + Supabase
+- **CICD**: Docker
 - **Test**: Jest, flutter test
 - **협업도구**: Github, Discord, Figma

@@ -1,0 +1,578 @@
+---
+alwaysApply: false
+---
+
+- 모든 API는 `Content-Type: application/json` 사용
+- 인증 필요 API:
+  - 헤더: `Authorization: Bearer <token>`
+  - 회원가입(`/auth/signup`), 로그인(`/auth/login`)은 제외
+
+# 스키마
+
+### **1) User**
+
+```
+User
+- id            (PK)
+- name          (string)
+- is_child      (boolean)
+- password_hash (string)
+- created_at
+- updated_at
+
+```
+
+---
+
+### **2) App (업데이트됨)**
+
+```
+App
+- id         (PK)
+- name       (string)
+- img_path   (string)   // 앱 아이콘 이미지 경로
+- run_path   (string)   // 앱 실행 경로 (라우트 또는 실제 실행 파일 경로)
+```
+
+예시:
+
+- `"webos://browser/index"`
+- `"/apps/video-player"`
+- `"app://youtube"`
+  이런 식으로 원하는 구조로 저장 가능.
+
+---
+
+### **3) UserApp (사용자별 앱 순서)**
+
+```
+UserApp
+- id         (PK)
+- user_id    (FK → User.id)
+- app_id     (FK → App.id)
+- sort_order (int)
+```
+
+---
+
+### **4) Memo**
+
+```
+Memo
+- id         (PK)
+- user_id    (FK → User.id)
+- memo_type  (int)     // 1 or 2
+- title      (string)
+- subtitle   (string)
+- created_at
+- updated_at
+
+```
+
+# API 명세서
+
+## 1. 인증
+
+### 1-1. 회원가입
+
+**POST `/auth/signup`**
+
+- 설명: 새 유저 생성
+
+### Request
+
+```json
+{
+  "name": "홍길동",
+  "password": "plain-password",
+  "isChild": false
+}
+```
+
+**Request Schema:**
+
+- `name` (string, required): 사용자 이름 (최소 1자)
+- `password` (string, required): 비밀번호 (최소 4자)
+- `isChild` (boolean, optional): 자녀 계정 여부 (기본값: false)
+
+### Response (201 Created)
+
+```json
+{
+  "success": true,
+  "message": "User created successfully",
+  "responseObject": {
+    "id": 1,
+    "name": "홍길동",
+    "isChild": false,
+    "createdAt": "2025-11-14T10:00:00Z"
+  },
+  "statusCode": 201
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 실제 데이터
+  - `id` (number): 사용자 ID
+  - `name` (string): 사용자 이름
+  - `isChild` (boolean): 자녀 계정 여부
+  - `createdAt` (string): 생성 일시 (ISO 8601)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 1-2. 로그인
+
+**POST `/auth/login`**
+
+- 설명: 로그인 후 액세스 토큰 발급
+
+### Request
+
+```json
+{
+  "name": "홍길동",
+  "password": "plain-password"
+}
+```
+
+**Request Schema:**
+
+- `name` (string, required): 사용자 이름 (최소 1자)
+- `password` (string, required): 비밀번호 (최소 1자)
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "responseObject": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": 1,
+      "name": "홍길동",
+      "isChild": false
+    }
+  },
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 실제 데이터
+  - `token` (string): JWT 액세스 토큰
+  - `user` (object): 사용자 정보
+    - `id` (number): 사용자 ID
+    - `name` (string): 사용자 이름
+    - `isChild` (boolean): 자녀 계정 여부
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+## 2. 메모 API (CRUD)
+
+`Memo` 스키마 요약:
+
+```
+Memo
+- id
+- user_id
+- memo_type (1 or 2)
+- title
+- subtitle
+- created_at
+- updated_at
+
+```
+
+> 모든 메모 API는 로그인 필요
+>
+> `Authorization: Bearer <token>`
+
+---
+
+### 2-1. 메모 목록 조회
+
+**GET `/memos`**
+
+- 설명: 현재 로그인한 유저의 모든 메모 반환
+- 옵션: `memoType`으로 필터 가능
+
+### Query Params (optional)
+
+- `memoType`: `1`, `2`, `3`, 또는 `4` (정수)
+
+예: `/memos?memoType=1`
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Memos retrieved successfully",
+  "responseObject": [
+    {
+      "id": 1,
+      "memoType": 1,
+      "title": "메모 제목",
+      "subtitle": "부제목",
+      "createdAt": "2025-11-14T10:00:00Z",
+      "updatedAt": "2025-11-14T10:00:00Z"
+    },
+    {
+      "id": 2,
+      "memoType": 2,
+      "title": "다른 메모",
+      "subtitle": "다른 부제목",
+      "createdAt": "2025-11-14T11:00:00Z",
+      "updatedAt": "2025-11-14T11:00:00Z"
+    }
+  ],
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (array): 메모 배열
+  - 각 메모 객체:
+    - `id` (number): 메모 ID
+    - `memoType` (number): 메모 타입 (1, 2, 3, 또는 4)
+    - `title` (string): 메모 제목
+    - `subtitle` (string): 메모 부제목
+    - `createdAt` (string): 생성 일시 (ISO 8601)
+    - `updatedAt` (string): 수정 일시 (ISO 8601)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 2-2. 메모 단건 조회
+
+**GET `/memos/:id`**
+
+- 설명: 특정 메모 상세 조회 (본인 메모만)
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Memo retrieved successfully",
+  "responseObject": {
+    "id": 1,
+    "memoType": 1,
+    "title": "메모 제목",
+    "subtitle": "부제목",
+    "createdAt": "2025-11-14T10:00:00Z",
+    "updatedAt": "2025-11-14T10:00:00Z"
+  },
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 메모 데이터
+  - `id` (number): 메모 ID
+  - `memoType` (number): 메모 타입 (1, 2, 3, 또는 4)
+  - `title` (string): 메모 제목
+  - `subtitle` (string): 메모 부제목
+  - `createdAt` (string): 생성 일시 (ISO 8601)
+  - `updatedAt` (string): 수정 일시 (ISO 8601)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 2-3. 메모 생성
+
+**POST `/memos`**
+
+- 설명: 새 메모 생성
+- 제약: `memoType`은 `1`, `2`, `3`, 또는 `4`
+
+### Request
+
+```json
+{
+  "memoType": 1,
+  "title": "메모 제목",
+  "subtitle": "부제목"
+}
+```
+
+**Request Schema:**
+
+- `memoType` (number, required): 메모 타입 (1, 2, 3, 또는 4)
+- `title` (string, required): 메모 제목 (최소 1자)
+- `subtitle` (string, required): 메모 부제목 (최소 1자)
+
+### Response (201 Created)
+
+```json
+{
+  "success": true,
+  "message": "Memo created successfully",
+  "responseObject": {
+    "id": 1,
+    "memoType": 1,
+    "title": "메모 제목",
+    "subtitle": "부제목",
+    "createdAt": "2025-11-14T10:00:00Z",
+    "updatedAt": "2025-11-14T10:00:00Z"
+  },
+  "statusCode": 201
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 생성된 메모 데이터
+  - `id` (number): 메모 ID
+  - `memoType` (number): 메모 타입 (1, 2, 3, 또는 4)
+  - `title` (string): 메모 제목
+  - `subtitle` (string): 메모 부제목
+  - `createdAt` (string): 생성 일시 (ISO 8601)
+  - `updatedAt` (string): 수정 일시 (ISO 8601)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 2-4. 메모 수정
+
+**PATCH `/memos/:id`**
+
+- 설명: 특정 메모의 제목/부제목 수정 (memoType 변경은 안 한다고 가정)
+
+### Request
+
+```json
+{
+  "title": "수정된 제목",
+  "subtitle": "수정된 부제목"
+}
+```
+
+**Request Schema:**
+
+- `title` (string, optional): 메모 제목 (최소 1자, 제공 시 필수)
+- `subtitle` (string, optional): 메모 부제목 (최소 1자, 제공 시 필수)
+
+> 필드는 부분 수정 가능합니다. `title` 또는 `subtitle` 중 하나만 보내도 됩니다. 단, 제공된 필드는 최소 1자 이상이어야 합니다.
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Memo updated successfully",
+  "responseObject": {
+    "id": 1,
+    "memoType": 1,
+    "title": "수정된 제목",
+    "subtitle": "수정된 부제목",
+    "createdAt": "2025-11-14T10:00:00Z",
+    "updatedAt": "2025-11-14T11:00:00Z"
+  },
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 수정된 메모 데이터
+  - `id` (number): 메모 ID
+  - `memoType` (number): 메모 타입 (1, 2, 3, 또는 4)
+  - `title` (string): 메모 제목
+  - `subtitle` (string): 메모 부제목
+  - `createdAt` (string): 생성 일시 (ISO 8601)
+  - `updatedAt` (string): 수정 일시 (ISO 8601)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 2-5. 메모 삭제
+
+**DELETE `/memos/:id`**
+
+- 설명: 특정 메모 삭제
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "Memo deleted successfully",
+  "responseObject": {
+    "success": true
+  },
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 삭제 결과
+  - `success` (boolean): 삭제 성공 여부
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+## 3. 사용자별 앱 목록 / 순서
+
+스키마 요약:
+
+```
+App
+- id
+- name
+- img_path
+- run_path
+
+UserApp
+- id
+- user_id
+- app_id
+- sort_order
+
+```
+
+> 모든 앱 API도 로그인 필요
+>
+> `Authorization: Bearer <token>`
+
+---
+
+### 3-1. 사용자별 앱 전체 목록 (순서 포함) 조회
+
+**GET `/apps`**
+
+- 설명: 현재 로그인한 유저의 앱 목록 + 순서 반환
+- `UserApp.sort_order` 기준 오름차순 정렬해서 반환
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "User apps retrieved successfully",
+  "responseObject": [
+    {
+      "appId": 3,
+      "name": "YouTube",
+      "imgPath": "/images/youtube.png",
+      "runPath": "app://youtube",
+      "order": 1
+    },
+    {
+      "appId": 1,
+      "name": "Browser",
+      "imgPath": "/images/browser.png",
+      "runPath": "webos://browser/index",
+      "order": 2
+    }
+  ],
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (array): 앱 배열 (sort_order 기준 오름차순 정렬)
+  - 각 앱 객체:
+    - `appId` (number): 앱 ID
+    - `name` (string): 앱 이름
+    - `imgPath` (string): 앱 아이콘 이미지 경로
+    - `runPath` (string): 앱 실행 경로
+    - `order` (number): 정렬 순서 (1부터 시작)
+- `statusCode` (number): HTTP 상태 코드
+
+---
+
+### 3-2. 사용자별 앱 순서/목록 업데이트
+
+**PUT `/apps/order`**
+
+- 설명:
+  - 유저의 앱 목록과 순서를 한 번에 업데이트
+  - `apps` 배열의 순서대로 `sort_order`를 1, 2, 3… 부여
+  - `id`가 있으면 기존 앱을 사용하고, 없으면 새 앱을 생성합니다
+
+### Request
+
+```json
+{
+  "apps": [
+    {
+      "id": 3,
+      "name": "YouTube",
+      "imgPath": "/images/youtube.png",
+      "runPath": "app://youtube"
+    },
+    {
+      "id": 1,
+      "name": "Browser",
+      "imgPath": "/images/browser.png",
+      "runPath": "webos://browser/index"
+    },
+    {
+      "name": "New App",
+      "imgPath": "/images/newapp.png",
+      "runPath": "app://newapp"
+    }
+  ]
+}
+```
+
+**Request Schema:**
+
+- `apps` (array, required): 앱 배열 (최소 1개 이상 필요)
+  - 각 앱 객체:
+    - `id` (number, optional): 기존 앱 ID (있으면 기존 앱 사용, 없으면 새 앱 생성)
+    - `name` (string, required): 앱 이름 (최소 1자)
+    - `imgPath` (string, required): 앱 아이콘 이미지 경로 (최소 1자)
+    - `runPath` (string, required): 앱 실행 경로 (최소 1자)
+
+> **동작 방식:**
+>
+> - `apps` 배열의 순서대로 `sort_order`가 1, 2, 3... 으로 부여됩니다.
+> - 배열의 첫 번째 앱이 `order: 1`, 두 번째 앱이 `order: 2`가 됩니다.
+
+### Response (200 OK)
+
+```json
+{
+  "success": true,
+  "message": "App order updated successfully",
+  "responseObject": {
+    "success": true
+  },
+  "statusCode": 200
+}
+```
+
+**Response Schema:**
+
+- `success` (boolean): 요청 성공 여부
+- `message` (string): 응답 메시지
+- `responseObject` (object): 업데이트 결과
+  - `success` (boolean): 업데이트 성공 여부
+- `statusCode` (number): HTTP 상태 코드

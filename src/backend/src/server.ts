@@ -41,7 +41,7 @@ app.use(requestLogger);
 
 app.use("/swagger", openAPIRouter);
 app.use("/auth", authRouter);
-app.use("/me/apps", appsRouter);
+app.use("/apps", appsRouter);
 app.use("/memos", memoRouter);
 
 app.use((req, res) => {

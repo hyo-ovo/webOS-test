@@ -1,9 +1,22 @@
 # WebOSServiceBridge 플러그인 문제 해결 가이드
 
-## 현재 문제
-- `WebOSServiceBridge` 플러그인이 webOS 디바이스에서 응답을 받지 못함
-- `subscribe()` 스트림이 생성되지만 데이터가 방출되지 않음
-- 30초 타임아웃 발생
+## 현재 문제 상황
+
+### 확인된 문제
+1. **`WebOSServiceBridge` 플러그인이 webOS 디바이스에서 응답하지 않음**
+   - `subscribe()` 스트림이 생성되지만 데이터가 방출되지 않음
+   - 30초 타임아웃 발생
+   - 로그: `[CustomWebOSServiceBridge] subscribe() 스트림 획득` 이후 응답 없음
+
+2. **직접 MethodChannel도 작동하지 않음**
+   - `MissingPluginException: No implementation found for method call on channel com.webos.service`
+   - 네이티브 코드에서 해당 MethodChannel이 구현되지 않음
+
+### 테스트 결과
+- ✅ 플러그인 인스턴스 생성: 성공
+- ✅ `subscribe()` 스트림 생성: 성공
+- ❌ 스트림에서 데이터 수신: 실패 (30초 타임아웃)
+- ❌ 직접 MethodChannel: 실패 (MissingPluginException)
 
 ## 해결 방법
 
@@ -57,9 +70,34 @@ final result = await platform.invokeMethod('call', {
 3. MethodChannel 통신 확인
 4. 권한 확인
 
+## 즉시 조치 사항
+
+### 1. 플러그인 개발자에게 문의 (최우선)
+- GitHub Issues: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk/issues
+- 문제 설명:
+  - `WebOSServiceBridge` 플러그인이 webOS 디바이스에서 응답하지 않음
+  - `subscribe()` 스트림이 생성되지만 데이터가 방출되지 않음
+  - 30초 타임아웃 발생
+  - 사용 예제 코드 요청
+
+### 2. 플러그인 소스 코드 확인
+```bash
+git clone https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
+cd flutter-webos-sdk/plugins/packages/webos_service_bridge
+# 소스 코드 확인하여 올바른 사용 방법 파악
+```
+
+### 3. 네이티브 코드 구현 (최후의 수단)
+webOS 네이티브 코드에서 Luna Service를 직접 호출하는 MethodChannel 구현 필요
+
 ## 권장 사항
-1. 먼저 플러그인 GitHub 저장소의 Issues를 확인
-2. 플러그인 사용 예제 코드 확인
-3. 플러그인 개발자에게 문의
-4. 필요시 직접 네이티브 코드 호출 방식으로 전환
+1. **즉시**: 플러그인 GitHub 저장소의 Issues 확인 및 문제 보고
+2. **단기**: 플러그인 사용 예제 코드 확인
+3. **중기**: 플러그인 개발자와 협의하여 해결
+4. **장기**: 필요시 네이티브 코드 직접 구현
+
+## 현재 상태
+- 플러그인 문제로 인해 동영상 재생 기능이 작동하지 않음
+- 모든 디버깅 로그가 추가되어 있으므로 문제 원인 파악 가능
+- 플러그인 개발자의 지원이 필요함
 

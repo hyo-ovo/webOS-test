@@ -89,28 +89,9 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] URI: ${request.uri}');
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
     
-    // 먼저 직접 MethodChannel 방식 시도
-    final method = request.payload['method'] as String? ?? '';
-    final payloadWithoutMethod = <String, dynamic>{...request.payload};
-    payloadWithoutMethod.remove('method');
-    
-    debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 방식 시도');
-    final directResult = await DirectLunaServiceBridge.callOneReply(
-      uri: request.uri,
-      method: method,
-      payload: payloadWithoutMethod.isEmpty ? null : payloadWithoutMethod,
-    );
-    
-    // 직접 MethodChannel이 성공하면 반환
-    if (directResult != null && 
-        (directResult['returnValue'] == true || 
-         directResult['errorCode'] != null)) {
-      debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 성공');
-      return directResult;
-    }
-    
-    // 직접 MethodChannel이 실패하면 기존 플러그인 방식 시도
-    debugPrint('[CustomWebOSServiceBridge] 직접 MethodChannel 실패, 플러그인 방식 시도');
+    // 주의: WebOSServiceBridge 플러그인이 webOS 디바이스에서 응답하지 않는 문제가 있음
+    // 플러그인 개발자에게 문의하거나 플러그인 소스 코드를 확인해야 함
+    // GitHub: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
     
     try {
       // CustomWebOSServiceBridge 인스턴스를 생성하여 subscribe 방식 사용

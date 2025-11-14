@@ -37,8 +37,15 @@ class _AppLauncherWidgetState extends State<AppLauncherWidget> {
               .map((app) => AppInfo.fromJson(app as Map<String, dynamic>))
               .toList();
 
+          // 아이콘 경로 디버깅
+          print('📱 로드된 앱 목록 (${loadedApps.length}개):');
+          for (final app in loadedApps) {
+            print('  - ${app.title}: icon="${app.icon}"');
+          }
+
           // TODO: 인증 시스템 구현 후 실제 토큰 사용
-          // 임시: 토큰 없이 순서 불러오기 시도
+          // 임시: 백엔드 순서 무시하고 Luna API에서 받은 순서 그대로 사용
+          /*
           try {
             // 백엔드에서 저장된 앱 순서 불러오기
             final savedOrder = await AppOrderApi.getUserAppOrder('temp-token');
@@ -51,6 +58,8 @@ class _AppLauncherWidgetState extends State<AppLauncherWidget> {
           } catch (e) {
             print('⚠️ 저장된 순서 불러오기 실패 (기본 순서 사용): $e');
           }
+          */
+          print('ℹ️ 백엔드 순서 무시, Luna API 순서 그대로 사용');
 
           setState(() {
             apps = loadedApps;

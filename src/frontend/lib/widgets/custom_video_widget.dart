@@ -36,6 +36,17 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
     }
   }
 
+  @override
+  void didUpdateWidget(CustomVideoWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // videoUrl이 변경되면 새로운 비디오 초기화
+    if (widget.videoUrl != null && widget.videoUrl != oldWidget.videoUrl) {
+      _controller?.dispose();
+      _controller = null;
+      _initializeVideo();
+    }
+  }
+
   Future<void> _initializeVideo() async {
     if (_isInitializing || _controller != null) return;
     
@@ -49,7 +60,13 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
         Uri.parse(widget.videoUrl!),
       );
       
+      // 비디오 상태 리스너 추가
+      _controller!.addListener(_videoListener);
+      
       await _controller!.initialize();
+      
+      // 반복 재생 설정
+      await _controller!.setLooping(true);
       
       if (mounted) {
         setState(() {
@@ -69,8 +86,20 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
     }
   }
 
+  void _videoListener() {
+    if (_controller == null) return;
+    
+    // 비디오 상태 변화 시 UI 업데이트
+    if (mounted) {
+      setState(() {
+        // 상태 변화를 감지하여 UI 업데이트
+      });
+    }
+  }
+
   @override
   void dispose() {
+    _controller?.removeListener(_videoListener);
     _controller?.dispose();
     super.dispose();
   }
@@ -110,22 +139,23 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
                         ),
                       ),
               ),
-            // 그라데이션 오버레이
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withOpacity(0.25),
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.35),
-                    ],
+            // 그라데이션 오버레이 (비디오가 있을 때만 표시, 투명도 낮춤)
+            if (_controller != null && _controller!.value.isInitialized)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.1),
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.15),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
             // 로딩 또는 에러 메시지
             if (_isInitializing)
               const Center(

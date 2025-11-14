@@ -47,6 +47,9 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
     }
   }
 
+  static const String _defaultVideoUrl =
+      'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+
   Future<void> _initializeVideo() async {
     if (_isInitializing || _controller != null) return;
     
@@ -56,9 +59,9 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
     });
 
     try {
-      _controller = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl!),
-      );
+      final videoUrl = widget.videoUrl ?? _defaultVideoUrl;
+
+      _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
       
       // 비디오 상태 리스너 추가
       _controller!.addListener(_videoListener);

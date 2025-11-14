@@ -111,66 +111,56 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 사용 가능한 크기 사용 (width/height가 지정되면 사용, 아니면 제약 조건 사용)
-        final double targetWidth = widget.width ?? constraints.maxWidth;
-        final double targetHeight = widget.height ?? constraints.maxHeight;
-        
+        final mediaSize = MediaQuery.sizeOf(context);
+        final double resolvedWidth = widget.width ??
+            (constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : mediaSize.width);
+        double resolvedHeight = widget.height ??
+            (constraints.hasBoundedHeight
+                ? constraints.maxHeight
+                : resolvedWidth / (16 / 9));
+
+        // 혹시라도 여전히 무한대면 안전값 사용
+        final double width = resolvedWidth.isFinite ? resolvedWidth : mediaSize.width;
+        resolvedHeight = resolvedHeight.isFinite ? resolvedHeight : width / (16 / 9);
+
         return SizedBox(
-          width: targetWidth.isFinite ? targetWidth : constraints.maxWidth,
-          height: targetHeight.isFinite ? targetHeight : constraints.maxHeight,
+          width: width,
+          height: resolvedHeight,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
             child: Stack(
               fit: StackFit.expand,
               children: [
-                // 비디오 플레이어 또는 썸네일
                 if (_controller != null && _controller!.value.isInitialized)
-                  Positioned.fill(
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final aspectRatio = _controller!.value.aspectRatio;
-                        final maxWidth = constraints.maxWidth;
-                        final maxHeight = constraints.maxHeight;
-                        
-                        // 비디오가 영역을 채우도록 크기 계산
-                        double width = maxWidth;
-                        double height = width / aspectRatio;
-                        
-                        if (height > maxHeight) {
-                          height = maxHeight;
-                          width = height * aspectRatio;
-                        }
-                        
-                        return Center(
-                          child: SizedBox(
-                            width: width,
-                            height: height,
-                            child: ClipRect(
-                              child: VideoPlayer(_controller!),
-                            ),
-                          ),
-                        );
-                      },
+                  Align(
+                    alignment: Alignment.center,
+                    child: SizedBox(
+                      width: width,
+                      height: resolvedHeight,
+                      child: ClipRect(
+                        child: VideoPlayer(_controller!),
+                      ),
                     ),
                   )
-            else
-              Container(
-                color: Colors.black.withOpacity(0.2),
-                child: widget.thumbnail != null
-                    ? Image(
-                        image: widget.thumbnail!,
-                        fit: BoxFit.cover,
-                      )
-                    : const Center(
-                        child: Icon(
-                          Icons.videocam_rounded,
-                          size: 64,
-                          color: Colors.white70,
-                        ),
-                      ),
-              ),
-            // 그라데이션 오버레이 제거 (비디오가 잘 보이도록)
-            // 로딩 또는 에러 메시지
+                else
+                  ColoredBox(
+                    color: Colors.black.withOpacity(0.2),
+                    child: widget.thumbnail != null
+                        ? Image(
+                            image: widget.thumbnail!,
+                            fit: BoxFit.cover,
+                          )
+                        : const Center(
+                            child: Icon(
+                              Icons.videocam_rounded,
+                              size: 64,
+                              color: Colors.white70,
+                            ),
+                          ),
+                  ),
+                // 로딩 또는 에러 메시지
             if (_isInitializing)
               const Center(
                 child: CircularProgressIndicator(
@@ -232,7 +222,7 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
           ],
         ),
       ),
-    );
+        );
       },
     );
   }

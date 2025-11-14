@@ -33,19 +33,54 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
     
     try {
+      // WebOSServiceBridge 인스턴스를 생성하여 호출 시도
+      // 플러그인이 static callOneReply 대신 인스턴스 메서드를 사용할 수 있음
+      final bridge = WebOSServiceBridge(
+        request.uri,
+        request.payload as Map<String, dynamic>,
+      );
+      
+      debugPrint('[CustomWebOSServiceBridge] WebOSServiceBridge 인스턴스 생성 완료');
+      
+      // subscribe를 통해 응답을 받는 방식으로 시도
+      final completer = Completer<Map<String, dynamic>?>();
+      final subscription = bridge.subscribe().listen(
+        (response) {
+          debugPrint('[CustomWebOSServiceBridge] subscribe 응답: $response');
+          if (!completer.isCompleted) {
+            completer.complete(response);
+          }
+        },
+        onError: (error) {
+          debugPrint('[CustomWebOSServiceBridge] subscribe 에러: $error');
+          if (!completer.isCompleted) {
+            completer.completeError(error);
+          }
+        },
+        onDone: () {
+          debugPrint('[CustomWebOSServiceBridge] subscribe 완료');
+          if (!completer.isCompleted) {
+            completer.complete(null);
+          }
+        },
+        cancelOnError: false,
+      );
+      
       // 타임아웃 추가 (30초)
-      final result = await WebOSServiceBridge.callOneReply(request)
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              debugPrint('[CustomWebOSServiceBridge] callOneReply 타임아웃 (30초)');
-              return <String, dynamic>{
-                'returnValue': false,
-                'errorCode': -1,
-                'errorText': 'Request timeout after 30 seconds',
-              };
-            },
-          );
+      final result = await completer.future.timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          debugPrint('[CustomWebOSServiceBridge] callOneReply 타임아웃 (30초)');
+          subscription.cancel();
+          return <String, dynamic>{
+            'returnValue': false,
+            'errorCode': -1,
+            'errorText': 'Request timeout after 30 seconds',
+          };
+        },
+      );
+      
+      await subscription.cancel();
       debugPrint('[CustomWebOSServiceBridge] callOneReply 완료: $result');
       return result;
     } catch (e, stackTrace) {

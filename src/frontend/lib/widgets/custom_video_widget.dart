@@ -112,21 +112,20 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final mediaSize = MediaQuery.sizeOf(context);
-        final double resolvedWidth = widget.width ??
-            (constraints.hasBoundedWidth
-                ? constraints.maxWidth
-                : mediaSize.width);
+        double resolvedWidth = widget.width ??
+            (constraints.hasBoundedWidth ? constraints.maxWidth : mediaSize.width);
         double resolvedHeight = widget.height ??
-            (constraints.hasBoundedHeight
-                ? constraints.maxHeight
-                : resolvedWidth / (16 / 9));
+            (constraints.hasBoundedHeight ? constraints.maxHeight : resolvedWidth / (16 / 9));
 
-        // 혹시라도 여전히 무한대면 안전값 사용
-        final double width = resolvedWidth.isFinite ? resolvedWidth : mediaSize.width;
-        resolvedHeight = resolvedHeight.isFinite ? resolvedHeight : width / (16 / 9);
+        if (!resolvedWidth.isFinite) {
+          resolvedWidth = mediaSize.width;
+        }
+        if (!resolvedHeight.isFinite) {
+          resolvedHeight = resolvedWidth / (16 / 9);
+        }
 
         return SizedBox(
-          width: width,
+          width: resolvedWidth,
           height: resolvedHeight,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(24),
@@ -134,15 +133,44 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
               fit: StackFit.expand,
               children: [
                 if (_controller != null && _controller!.value.isInitialized)
-                  Align(
-                    alignment: Alignment.center,
-                    child: SizedBox(
-                      width: width,
-                      height: resolvedHeight,
-                      child: ClipRect(
-                        child: VideoPlayer(_controller!),
-                      ),
-                    ),
+                  LayoutBuilder(
+                    builder: (_, boxConstraints) {
+                      final value = _controller!.value;
+                      final Size intrinsicSize = value.size;
+                      double videoWidth =
+                          intrinsicSize.width > 0 ? intrinsicSize.width : resolvedWidth;
+                      double videoHeight =
+                          intrinsicSize.height > 0 ? intrinsicSize.height : resolvedHeight;
+
+                      final double widgetAspect = resolvedWidth / resolvedHeight;
+                      final double videoAspect =
+                          (videoWidth > 0 && videoHeight > 0) ? videoWidth / videoHeight : widgetAspect;
+
+                      if (videoAspect < widgetAspect) {
+                        videoWidth = resolvedWidth;
+                        videoHeight = videoWidth / videoAspect;
+                      } else {
+                        videoHeight = resolvedHeight;
+                        videoWidth = videoHeight * videoAspect;
+                      }
+
+                      return Center(
+                        child: SizedBox(
+                          width: videoWidth,
+                          height: videoHeight,
+                          child: ClipRect(
+                            child: FittedBox(
+                              fit: BoxFit.cover,
+                              child: SizedBox(
+                                width: videoWidth,
+                                height: videoHeight,
+                                child: VideoPlayer(_controller!),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   )
                 else
                   ColoredBox(

@@ -33,28 +33,31 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
     
     try {
-      // WebOSServiceBridge 인스턴스를 생성하여 호출 시도
-      // 플러그인이 static callOneReply 대신 인스턴스 메서드를 사용할 수 있음
-      final bridge = WebOSServiceBridge(
-        request.uri,
-        request.payload as Map<String, dynamic>,
-      );
+      // CustomWebOSServiceBridge 인스턴스를 생성하여 subscribe 방식 사용
+      // BridgeService와 동일한 방식으로 작동하도록 함
+      final bridgeInstance = CustomWebOSServiceBridge(request);
       
-      debugPrint('[CustomWebOSServiceBridge] WebOSServiceBridge 인스턴스 생성 완료');
+      debugPrint('[CustomWebOSServiceBridge] CustomWebOSServiceBridge 인스턴스 생성 완료');
       
       // subscribe를 통해 응답을 받는 방식으로 시도
       final completer = Completer<Map<String, dynamic>?>();
-      final subscription = bridge.subscribe().listen(
+      StreamSubscription<Map<String, dynamic>>? subscription;
+      
+      subscription = bridgeInstance.subscribe().listen(
         (response) {
           debugPrint('[CustomWebOSServiceBridge] subscribe 응답: $response');
           if (!completer.isCompleted) {
             completer.complete(response);
+            subscription?.cancel();
+            bridgeInstance.cancel();
           }
         },
         onError: (error) {
           debugPrint('[CustomWebOSServiceBridge] subscribe 에러: $error');
           if (!completer.isCompleted) {
             completer.completeError(error);
+            subscription?.cancel();
+            bridgeInstance.cancel();
           }
         },
         onDone: () {
@@ -71,7 +74,8 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
         const Duration(seconds: 30),
         onTimeout: () {
           debugPrint('[CustomWebOSServiceBridge] callOneReply 타임아웃 (30초)');
-          subscription.cancel();
+          subscription?.cancel();
+          bridgeInstance.cancel();
           return <String, dynamic>{
             'returnValue': false,
             'errorCode': -1,
@@ -80,7 +84,6 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
         },
       );
       
-      await subscription.cancel();
       debugPrint('[CustomWebOSServiceBridge] callOneReply 완료: $result');
       return result;
     } catch (e, stackTrace) {

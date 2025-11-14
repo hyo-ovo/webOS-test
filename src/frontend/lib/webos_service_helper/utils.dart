@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:webos_service_bridge/webos_service_bridge.dart';
 import 'custom_webos_service_bridge.dart';
 import 'webos_service_helper.dart';
@@ -57,9 +58,25 @@ Future<Map<String, dynamic>?> callOneReply({
     if (payload != null) ...payload,
   };
   
+  debugPrint('[WebOSServiceHelper] callOneReply 호출');
+  debugPrint('[WebOSServiceHelper] URI: $uri');
+  debugPrint('[WebOSServiceHelper] Method: $method');
+  debugPrint('[WebOSServiceHelper] Full Payload: $fullPayload');
+  debugPrint('[WebOSServiceHelper] useMock: $useMock');
+  
   final WebOSServiceData serviceData = WebOSServiceData(uri,
       payload: fullPayload, optHashCode: defaultHashCode);
-  return useMock
-      ? MockWebOSServiceBridge.callOneReply(serviceData)
-      : CustomWebOSServiceBridge.callOneReply(serviceData);
+  
+  try {
+    final result = useMock
+        ? await MockWebOSServiceBridge.callOneReply(serviceData)
+        : await CustomWebOSServiceBridge.callOneReply(serviceData);
+    
+    debugPrint('[WebOSServiceHelper] callOneReply 응답: $result');
+    return result;
+  } catch (e, stackTrace) {
+    debugPrint('[WebOSServiceHelper] callOneReply 에러: $e');
+    debugPrint('[WebOSServiceHelper] 스택 트레이스: $stackTrace');
+    rethrow;
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:webos_service_bridge/webos_service_bridge.dart';
 import 'custom_webos_service_bridge.dart';
 import 'webos_service_helper.dart';
@@ -46,7 +47,17 @@ Future<Map<String, dynamic>?> callOneReply({
 }) async {
   final WebOSServiceData serviceData = WebOSServiceData('$uri/$method',
       payload: payload, optHashCode: defaultHashCode);
-  return useMock
-      ? MockWebOSServiceBridge.callOneReply(serviceData)
-      : CustomWebOSServiceBridge.callOneReply(serviceData);
+  
+  if (useMock) {
+    return MockWebOSServiceBridge.callOneReply(serviceData);
+  }
+  
+  // 실제 플러그인 호출 시도
+  try {
+    return await CustomWebOSServiceBridge.callOneReply(serviceData);
+  } catch (e) {
+    // 플러그인이 없거나 등록되지 않은 경우 Mock으로 fallback
+    debugPrint('[WebOS Service] 플러그인 호출 실패, Mock 모드로 전환: $e');
+    return MockWebOSServiceBridge.callOneReply(serviceData);
+  }
 }

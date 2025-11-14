@@ -89,6 +89,15 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
   void _videoListener() {
     if (_controller == null) return;
     
+    // 비디오 상태 로깅
+    final value = _controller!.value;
+    debugPrint('[CustomVideoWidget] 비디오 상태:');
+    debugPrint('  - isInitialized: ${value.isInitialized}');
+    debugPrint('  - isPlaying: ${value.isPlaying}');
+    debugPrint('  - aspectRatio: ${value.aspectRatio}');
+    debugPrint('  - duration: ${value.duration}');
+    debugPrint('  - position: ${value.position}');
+    
     // 비디오 상태 변화 시 UI 업데이트
     if (mounted) {
       setState(() {
@@ -119,9 +128,14 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
           children: [
             // 비디오 플레이어 또는 썸네일
             if (_controller != null && _controller!.value.isInitialized)
-              AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
+              Positioned.fill(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: AspectRatio(
+                    aspectRatio: _controller!.value.aspectRatio,
+                    child: VideoPlayer(_controller!),
+                  ),
+                ),
               )
             else
               Container(

@@ -18,16 +18,26 @@ const logger = pino({
       : undefined,
 });
 
-export const pool = new Pool({
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  database: env.DB_NAME,
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+// DATABASE_URL이 있으면 우선 사용, 없으면 개별 환경 변수 사용
+const poolConfig = env.DATABASE_URL && env.DATABASE_URL.trim() !== ""
+  ? {
+      connectionString: env.DATABASE_URL,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    }
+  : {
+      host: env.DB_HOST,
+      port: env.DB_PORT,
+      database: env.DB_NAME,
+      user: env.DB_USER,
+      password: env.DB_PASSWORD,
+      max: 20,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 2000,
+    };
+
+export const pool = new Pool(poolConfig);
 
 pool.on("error", (err: Error) => {
   logger.error(`Unexpected database error: ${err.message}`);

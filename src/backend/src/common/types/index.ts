@@ -1,50 +1,100 @@
-// 공통 타입 정의
+// 엔티티 타입 정의
 
-export interface App {
-	id: number;
-	app_id: string;
-	name: string;
-	icon_url: string | null;
-	created_at: Date;
+export interface User {
+  id: number;
+  name: string;
+  password_hash: string;
+  is_child: boolean;
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface UserAppOrder {
-	id: number;
-	user_id: number;
-	app_order: string[];
-	updated_at: Date;
+export interface App {
+  id: number;
+  name: string;
+  img_path: string;
+  run_path: string;
+}
+
+export interface UserApp {
+  id: number;
+  user_id: number;
+  app_id: number;
+  sort_order: number;
 }
 
 export interface Memo {
-	id: number;
-	user_id: number;
-	title: string;
-	content: string;
-	created_at: Date;
-	updated_at: Date;
+  id: number;
+  user_id: number;
+  memo_type: 1 | 2;
+  title: string;
+  subtitle: string;
+  created_at: Date;
+  updated_at: Date;
 }
 
-export interface Favorite {
-	id: number;
-	user_id: number;
-	app_id: string;
-	created_at: Date;
+// DTO 타입 정의
+
+export interface SignupRequest {
+  name: string;
+  password: string;
+  isChild: boolean;
 }
 
-export interface User {
-	id: number;
-	username: string;
-	face_encoding: string;
-	created_at: Date;
-	updated_at: Date;
+export interface SignupResponse {
+  id: number;
+  name: string;
+  isChild: boolean;
+  createdAt: string;
 }
 
-export interface UserInfo {
-	id: number;
-	username: string;
+export interface LoginRequest {
+  name: string;
+  password: string;
 }
 
-export interface AuthResponse {
-	token: string;
-	user_info: UserInfo;
+export interface LoginResponse {
+  token: string;
+  user: {
+    id: number;
+    name: string;
+    isChild: boolean;
+  };
+}
+
+export interface MemoResponse {
+  id: number;
+  memoType: 1 | 2;
+  title: string;
+  subtitle: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateMemoRequest {
+  memoType: 1 | 2;
+  title: string;
+  subtitle: string;
+}
+
+export interface UpdateMemoRequest {
+  title?: string;
+  subtitle?: string;
+}
+
+export interface UserAppResponse {
+  appId: number;
+  name: string;
+  imgPath: string;
+  runPath: string;
+  order: number;
+}
+
+export interface UpdateAppOrderRequest {
+  apps: Array<{
+    id?: number; // 기존 앱이면 id 제공, 새 앱이면 생략
+    name: string;
+    imgPath: string;
+    runPath: string;
+  }>;
 }

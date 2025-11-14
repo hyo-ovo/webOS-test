@@ -8,7 +8,17 @@ import { env } from "@/common/utils/envConfig";
 
 const logger = pino({
 	level: env.isProduction ? "info" : "debug",
-	transport: env.isProduction ? undefined : { target: "pino-pretty" },
+	transport:
+		env.LOG_FORMAT === "pretty"
+			? {
+					target: "pino-pretty",
+					options: {
+						colorize: true,
+						translateTime: "HH:MM:ss Z",
+						ignore: "pid,hostname",
+					},
+				}
+			: undefined,
 });
 
 const getLogLevel = (status: number) => {

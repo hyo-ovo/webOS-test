@@ -37,9 +37,5 @@ RUN ls -la models/ || echo "⚠️ Models folder not found"
 # 포트 노출
 EXPOSE 8080
 
-# 헬스체크
-HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:8080/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
-
 # 애플리케이션 실행
 CMD ["pnpm", "start:prod"]

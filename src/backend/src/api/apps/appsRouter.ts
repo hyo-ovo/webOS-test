@@ -3,77 +3,97 @@ import { Router } from "express";
 import { z } from "zod";
 import { authenticate } from "@/common/middleware/auth";
 import { appsController } from "./appsController";
+import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 
 export const appsRegistry = new OpenAPIRegistry();
 
-// Schema 정의
-const AppOrderResponseSchema = z.object({
-  app_order: z
-    .array(z.string())
-    .describe(
-      "앱 ID 순서 배열 (예: ['com.webos.app.browser', 'com.webos.app.settings'])"
-    ),
+const UserAppResponseSchema = z.object({
+  appId: z.number(),
+  name: z.string(),
+  imgPath: z.string(),
+  runPath: z.string(),
+  order: z.number(),
 });
 
-// API 등록
+const AppItemSchema = z.object({
+  id: z.number().int().positive().optional(),
+  name: z.string().min(1, "앱 이름은 필수입니다"),
+  imgPath: z.string().min(1, "이미지 경로는 필수입니다"),
+  runPath: z.string().min(1, "실행 경로는 필수입니다"),
+});
+
+const UpdateAppOrderRequestSchema = z.object({
+  apps: z
+    .array(AppItemSchema)
+    .min(1, "apps 배열은 최소 1개 이상의 요소가 필요합니다"),
+});
+
+// GET /me/apps
 appsRegistry.registerPath({
   method: "get",
-  path: "/apps/order",
+  path: "/me/apps",
   tags: ["Apps"],
-  summary: "사용자별 앱 순서 조회",
-  description:
-    "사용자가 설정한 앱 ID 순서를 반환합니다. 클라이언트는 Luna Service의 listLaunchPoints로 실제 앱 목록을 가져온 후, 이 순서 정보를 사용하여 정렬합니다.",
+  summary: "Get user's app list with order",
   security: [{ bearerAuth: [] }],
-  responses: {
-    200: {
-      description: "앱 순서 목록",
-      content: {
-        "application/json": {
-          schema: AppOrderResponseSchema,
-        },
-      },
-    },
-  },
+  responses: createApiResponse(
+    z.array(UserAppResponseSchema),
+    "User apps retrieved successfully"
+  ),
 });
 
+// PUT /me/apps/order
 appsRegistry.registerPath({
   method: "put",
-  path: "/apps/order",
+  path: "/me/apps/order",
   tags: ["Apps"],
-  summary: "사용자별 앱 순서 저장",
+  summary: "Update user's app order",
   description:
-    "사용자가 설정한 앱 ID 순서를 저장합니다. 앱 ID는 webOS 앱 식별자 (예: 'com.webos.app.browser')입니다.",
+    "사용자의 앱 목록과 순서를 업데이트합니다. apps 배열의 순서대로 sort_order가 1, 2, 3... 으로 부여됩니다. id가 있으면 기존 앱을 사용하고, 없으면 새 앱을 생성합니다.",
   security: [{ bearerAuth: [] }],
   request: {
     body: {
       content: {
         "application/json": {
-          schema: z.object({
-            order: z
-              .array(z.string())
-              .describe(
-                "앱 ID 순서 배열 (예: ['com.webos.app.browser', 'com.webos.app.settings'])"
-              ),
-          }),
+          schema: UpdateAppOrderRequestSchema,
+          example: {
+            apps: [
+              {
+                id: 3,
+                name: "YouTube",
+                imgPath: "/images/youtube.png",
+                runPath: "app://youtube",
+              },
+              {
+                id: 1,
+                name: "Browser",
+                imgPath: "/images/browser.png",
+                runPath: "webos://browser/index",
+              },
+              {
+                name: "New App",
+                imgPath: "/images/newapp.png",
+                runPath: "app://newapp",
+              },
+            ],
+          },
         },
       },
+      required: true,
     },
   },
-  responses: {
-    200: {
-      description: "저장 성공",
-    },
-  },
+  responses: createApiResponse(
+    z.object({ success: z.boolean() }),
+    "App order updated successfully"
+  ),
 });
 
 export const appsRouter: Router = (() => {
   const router = Router();
 
-  // 사용자별 앱 순서 조회 (인증 필요)
-  router.get("/order", authenticate, appsController.getUserAppOrder);
+  router.use(authenticate);
 
-  // 사용자별 앱 순서 저장 (인증 필요)
-  router.put("/order", authenticate, appsController.updateUserAppOrder);
+  router.get("/", appsController.getUserApps);
+  router.put("/order", appsController.updateAppOrder);
 
   return router;
 })();

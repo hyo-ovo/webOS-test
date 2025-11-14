@@ -7,52 +7,66 @@ import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 export const authRegistry = new OpenAPIRegistry();
 export const authRouter: Router = express.Router();
 
-const AuthRequestSchema = z.object({
-  username: z.string().min(1, "Username is required"),
+const SignupRequestSchema = z.object({
+  name: z.string().min(1, "Name is required"),
   password: z.string().min(4, "Password must be at least 4 characters"),
+  isChild: z.boolean().default(false),
 });
 
-const AuthResponseSchema = z.object({
+const SignupResponseSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  isChild: z.boolean(),
+  createdAt: z.string(),
+});
+
+const LoginRequestSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  password: z.string().min(1, "Password is required"),
+});
+
+const LoginResponseSchema = z.object({
+  token: z.string(),
   user: z.object({
     id: z.number(),
-    username: z.string(),
+    name: z.string(),
+    isChild: z.boolean(),
   }),
-  token: z.string(),
 });
 
 authRegistry.registerPath({
   method: "post",
-  path: "/auth/register",
+  path: "/auth/signup",
   tags: ["Auth"],
   summary: "Register a new user",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: AuthRequestSchema,
+          schema: SignupRequestSchema,
         },
       },
     },
   },
-  responses: createApiResponse(AuthResponseSchema, "User registered successfully"),
+  responses: createApiResponse(SignupResponseSchema, "User created successfully", 201),
 });
 
 authRegistry.registerPath({
   method: "post",
   path: "/auth/login",
   tags: ["Auth"],
-  summary: "Login with username and password",
+  summary: "Login with name and password",
   request: {
     body: {
       content: {
         "application/json": {
-          schema: AuthRequestSchema,
+          schema: LoginRequestSchema,
         },
       },
     },
   },
-  responses: createApiResponse(AuthResponseSchema, "Login successful"),
+  responses: createApiResponse(LoginResponseSchema, "Login successful"),
 });
 
-authRouter.post("/register", authController.register);
+authRouter.post("/signup", authController.signup);
 authRouter.post("/login", authController.login);

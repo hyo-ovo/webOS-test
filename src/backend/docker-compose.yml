@@ -34,6 +34,9 @@ services:
       PORT: 8080
       CORS_ORIGIN: "*"
       
+      # Logging Configuration
+      LOG_FORMAT: pretty
+      
       # Rate Limiting
       COMMON_RATE_LIMIT_MAX_REQUESTS: 1000
       COMMON_RATE_LIMIT_WINDOW_MS: 60000

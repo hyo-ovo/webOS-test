@@ -22,4 +22,8 @@ export const env = cleanEnv(process.env, {
 		devDefault: testOnly("your-secret-key-change-in-production"),
 	}),
 	JWT_EXPIRES_IN: str({ devDefault: testOnly("24h") }),
+	LOG_FORMAT: str({
+		devDefault: testOnly("pretty"),
+		choices: ["pretty", "json"],
+	}),
 });

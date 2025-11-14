@@ -1,109 +1,125 @@
-import { ServiceResponse } from "@/common/models/serviceResponse";
-import { authRepository } from "./authRepository";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { ServiceResponse } from "@/common/models/serviceResponse";
 import { env } from "@/common/utils/envConfig";
 import { logger } from "@/server";
-
-interface AuthResponse {
-  user: { id: number; username: string };
-  token: string;
-}
+import { authRepository } from "./authRepository";
+import type {
+  SignupRequest,
+  SignupResponse,
+  LoginRequest,
+  LoginResponse,
+} from "@/common/types";
 
 export class AuthService {
-	async register(username: string, password: string): Promise<ServiceResponse<AuthResponse | null>> {
-		try {
-			// 사용자명 중복 체크
-			const existingUser = await authRepository.findByUsername(username);
-			if (existingUser) {
-				return ServiceResponse.failure(
-					"Username already exists",
-					null,
-					StatusCodes.CONFLICT
-				);
-			}
+  async signup(
+    data: SignupRequest
+  ): Promise<ServiceResponse<SignupResponse | null>> {
+    try {
+      const { name, password, isChild } = data;
 
-			// 비밀번호 길이 검증
-			if (password.length < 4) {
-				return ServiceResponse.failure(
-					"Password must be at least 4 characters",
-					null,
-					StatusCodes.BAD_REQUEST
-				);
-			}
+      // 사용자명 중복 체크
+      const existingUser = await authRepository.findByName(name);
+      if (existingUser) {
+        return ServiceResponse.failure(
+          "Name already exists",
+          null,
+          StatusCodes.CONFLICT
+        );
+      }
 
-			const user = await authRepository.createUser(username, password);
+      // 비밀번호 길이 검증
+      if (password.length < 4) {
+        return ServiceResponse.failure(
+          "Password must be at least 4 characters",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-			// JWT 토큰 생성
-			const token = jwt.sign(
-				{ userId: user.id, username: user.username },
-				env.JWT_SECRET,
-				{ expiresIn: env.JWT_EXPIRES_IN }
-			);
+      // 비밀번호 해시화
+      const passwordHash = await bcrypt.hash(password, 10);
 
-			return ServiceResponse.success("User registered successfully", {
-				user: { id: user.id, username: user.username },
-				token,
-			});
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : "Unknown error";
-			logger.error(`Registration error: ${errorMessage}`);
-			return ServiceResponse.failure(
-				"Failed to register user",
-				null,
-				StatusCodes.INTERNAL_SERVER_ERROR
-			);
-		}
-	}
+      const user = await authRepository.createUser(name, passwordHash, isChild);
 
-	async login(username: string, password: string): Promise<ServiceResponse<AuthResponse | null>> {
-		try {
-			const user = await authRepository.findByUsername(username);
+      return ServiceResponse.success(
+        "User created successfully",
+        {
+          id: user.id,
+          name: user.name,
+          isChild: user.is_child,
+          createdAt: user.created_at.toISOString(),
+        },
+        StatusCodes.CREATED
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      logger.error(`Signup error: ${errorMessage}`);
+      return ServiceResponse.failure(
+        "Failed to create user",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
-			if (!user) {
-				return ServiceResponse.failure(
-					"Invalid username or password",
-					null,
-					StatusCodes.UNAUTHORIZED
-				);
-			}
+  async login(
+    data: LoginRequest
+  ): Promise<ServiceResponse<LoginResponse | null>> {
+    try {
+      const { name, password } = data;
 
-			const isPasswordValid = await authRepository.verifyPassword(
-				password,
-				user.password
-			);
+      const user = await authRepository.findByName(name);
 
-			if (!isPasswordValid) {
-				return ServiceResponse.failure(
-					"Invalid username or password",
-					null,
-					StatusCodes.UNAUTHORIZED
-				);
-			}
+      if (!user) {
+        return ServiceResponse.failure(
+          "Invalid name or password",
+          null,
+          StatusCodes.UNAUTHORIZED
+        );
+      }
 
-			// JWT 토큰 생성
-			const token = jwt.sign(
-				{ userId: user.id, username: user.username },
-				env.JWT_SECRET,
-				{ expiresIn: env.JWT_EXPIRES_IN }
-			);
+      const isPasswordValid = await authRepository.verifyPassword(
+        password,
+        user.password_hash
+      );
 
-			return ServiceResponse.success("Login successful", {
-				user: { id: user.id, username: user.username },
-				token,
-			});
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : "Unknown error";
-			logger.error(`Login error: ${errorMessage}`);
-			return ServiceResponse.failure(
-				"Failed to login",
-				null,
-				StatusCodes.INTERNAL_SERVER_ERROR
-			);
-		}
-	}
+      if (!isPasswordValid) {
+        return ServiceResponse.failure(
+          "Invalid name or password",
+          null,
+          StatusCodes.UNAUTHORIZED
+        );
+      }
+
+      // JWT 토큰 생성
+      const token = jwt.sign(
+        { userId: user.id, name: user.name },
+        env.JWT_SECRET,
+        { expiresIn: env.JWT_EXPIRES_IN }
+      );
+
+      return ServiceResponse.success("Login successful", {
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          isChild: user.is_child,
+        },
+      });
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      logger.error(`Login error: ${errorMessage}`);
+      return ServiceResponse.failure(
+        "Failed to login",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 export const authService = new AuthService();

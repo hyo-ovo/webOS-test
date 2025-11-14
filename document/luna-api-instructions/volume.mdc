@@ -1,0 +1,129 @@
+Audio
+Service URI - luna://com.webos.audio
+
+Provides methods for volume control.
+The Audio Setting service enables apps to control volume, with the following methods.
+
+Methods
+
+Method Description Supported in Emulator
+setMuted Mutes or unmutes the volume. Yes
+volumeDown Decreases the volume by 1. Yes
+volumeUp Increases the volume by 1. Yes
+setMuted
+Description
+
+Mutes or unmutes the volume.
+
+Parameters
+
+Name Required Type Description
+muted Required Boolean The flag that indicates whether to mute the volume or unmute the volume.
+true: mute the volume
+false: unmute the volume
+Call returns
+
+Name Required Type Description
+returnValue Required Boolean The flag that indicates the success/failure of the request.
+true: Success
+false: Failure
+errorCode Optional Number errorCode contains the error code if the method fails. The method returns errorCode only if it fails.
+See the Error Codes Reference of this method for more details.
+errorText Optional String errorText contains the error text if the method fails. The method returns errorText only if it fails.
+See the Error Codes Reference of this method for more details.
+Error reference
+
+Error Code Error Message
+1 Not a valid JSON message
+Example
+
+// One-time call
+var request = webOS.service.request('luna://com.webos.audio', {
+method: 'setMuted',
+parameters: { muted: true },
+onSuccess: function (inResponse) {
+console.log('TV is muted');
+// To-Do something
+},
+onFailure: function (inError) {
+console.log('Failed to set muted');
+console.log('[' + inError.errorCode + ']: ' + inError.errorText);
+// To-Do something
+return;
+},
+});
+Return example
+
+'returnValue': true
+**_ Begin Patch
+_** Update File: /Users/Inyoung/Desktop/26-2/lg-capstone/2025_sogang_6/document/luna-api-instructions/volume.md
+@@
+
+```markdown
+# Audio / Volume (통합형 문서)
+
+serviceUri: luna://com.webos.audio
+
+description: |
+오디오(볼륨) 제어를 위한 서비스입니다. 앱에서 음소거, 볼륨 올림/내림 등의 간단한 제어를 수행할 수 있습니다.
+
+schema:
+
+- title: Audio (Volume)
+  serviceUri: luna://com.webos.audio
+  methods:
+
+  - name: setMuted
+    description: 볼륨을 음소거하거나 음소거 해제합니다.
+    parameters:
+
+    - name: muted
+      type: boolean
+      required: true
+      description: true면 음소거, false면 음소거 해제
+      payloadExample:
+      { "muted": true }
+      returnExample:
+      { "returnValue": true }
+      usage:
+    - exampleJS: |
+      webOS.service.request('luna://com.webos.audio', { method: 'setMuted', parameters: { muted: true }, onSuccess: function(r){}, onFailure: function(e){} });
+
+  - name: volumeDown
+    description: 볼륨을 1만큼 감소시킵니다.
+    parameters: []
+    payloadExample: {}
+    returnExample:
+    { "returnValue": true }
+    errorReference:
+
+    - code: ERROR_3
+      message: Parameters should be empty
+      usage:
+    - exampleJS: |
+      webOS.service.request('luna://com.webos.audio', { method: 'volumeDown', onSuccess: function(r){}, onFailure: function(e){} });
+
+  - name: volumeUp
+    description: 볼륨을 1만큼 증가시킵니다.
+    parameters: []
+    payloadExample: {}
+    returnExample:
+    { "returnValue": true }
+    errorReference:
+    - code: ERROR_3
+      message: Parameters should be empty
+      usage:
+    - exampleJS: |
+      webOS.service.request('luna://com.webos.audio', { method: 'volumeUp', onComplete: function(r){}, onFailure: function(e){} });
+
+notes: |
+
+- setMuted는 반드시 `muted` 부울 값을 포함한 파라미터가 필요합니다.
+- volumeUp/volumeDown은 파라미터 없이 호출해야 하며, 잘못된 파라미터가 들어가면 `ERROR_3`을 반환할 수 있습니다.
+
+errors: |
+
+- 실패 시 응답에 `returnValue: false`와 함께 `errorCode`/`errorText`가 포함될 수 있습니다.
+```
+
+\*\*\* End Patch

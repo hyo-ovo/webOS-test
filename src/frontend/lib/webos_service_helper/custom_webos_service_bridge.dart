@@ -33,7 +33,19 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
     
     try {
-      final result = await WebOSServiceBridge.callOneReply(request);
+      // 타임아웃 추가 (30초)
+      final result = await WebOSServiceBridge.callOneReply(request)
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              debugPrint('[CustomWebOSServiceBridge] callOneReply 타임아웃 (30초)');
+              return <String, dynamic>{
+                'returnValue': false,
+                'errorCode': -1,
+                'errorText': 'Request timeout after 30 seconds',
+              };
+            },
+          );
       debugPrint('[CustomWebOSServiceBridge] callOneReply 완료: $result');
       return result;
     } catch (e, stackTrace) {

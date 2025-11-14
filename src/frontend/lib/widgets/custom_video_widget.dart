@@ -132,11 +132,11 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
                         final maxWidth = constraints.maxWidth;
                         final maxHeight = constraints.maxHeight;
                         
-                        // 비디오가 영역을 채우도록 크기 계산 (BoxFit.cover 방식)
+                        // 비디오가 영역을 채우도록 크기 계산
                         double width = maxWidth;
                         double height = width / aspectRatio;
                         
-                        if (height < maxHeight) {
+                        if (height > maxHeight) {
                           height = maxHeight;
                           width = height * aspectRatio;
                         }
@@ -145,8 +145,7 @@ class _CustomVideoWidgetState extends State<CustomVideoWidget> {
                           child: SizedBox(
                             width: width,
                             height: height,
-                            child: FittedBox(
-                              fit: BoxFit.cover,
+                            child: ClipRect(
                               child: VideoPlayer(_controller!),
                             ),
                           ),

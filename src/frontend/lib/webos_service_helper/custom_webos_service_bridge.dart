@@ -89,71 +89,11 @@ class CustomWebOSServiceBridge implements WebOSServiceBridgeBase {
     debugPrint('[CustomWebOSServiceBridge] URI: ${request.uri}');
     debugPrint('[CustomWebOSServiceBridge] Payload: ${request.payload}');
     
-    // 주의: WebOSServiceBridge 플러그인이 webOS 디바이스에서 응답하지 않는 문제가 있음
-    // 플러그인 개발자에게 문의하거나 플러그인 소스 코드를 확인해야 함
-    // GitHub: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
-    
     try {
-      // CustomWebOSServiceBridge 인스턴스를 생성하여 subscribe 방식 사용
-      // BridgeService와 동일한 방식으로 작동하도록 함
-      final bridgeInstance = CustomWebOSServiceBridge(request);
-      
-      debugPrint('[CustomWebOSServiceBridge] CustomWebOSServiceBridge 인스턴스 생성 완료');
-      
-      // subscribe를 통해 응답을 받는 방식으로 시도
-      final completer = Completer<Map<String, dynamic>?>();
-      StreamSubscription<Map<String, dynamic>>? subscription;
-      
-      debugPrint('[CustomWebOSServiceBridge] subscribe() 호출 전');
-      final stream = bridgeInstance.subscribe();
-      debugPrint('[CustomWebOSServiceBridge] subscribe() 스트림 획득');
-      
-      subscription = stream.listen(
-        (response) {
-          debugPrint('[CustomWebOSServiceBridge] subscribe 응답: $response');
-          if (!completer.isCompleted) {
-            completer.complete(response);
-            subscription?.cancel();
-            bridgeInstance.cancel();
-          }
-        },
-        onError: (error) {
-          debugPrint('[CustomWebOSServiceBridge] subscribe 에러: $error');
-          debugPrint('[CustomWebOSServiceBridge] 에러 타입: ${error.runtimeType}');
-          if (!completer.isCompleted) {
-            completer.completeError(error);
-            subscription?.cancel();
-            bridgeInstance.cancel();
-          }
-        },
-        onDone: () {
-          debugPrint('[CustomWebOSServiceBridge] subscribe 완료 (onDone)');
-          if (!completer.isCompleted) {
-            debugPrint('[CustomWebOSServiceBridge] completer가 완료되지 않았으므로 null 반환');
-            completer.complete(null);
-          }
-        },
-        cancelOnError: false,
-      );
-      
-      debugPrint('[CustomWebOSServiceBridge] subscribe listen 완료, 응답 대기 중...');
-      
-      // 타임아웃 추가 (30초)
-      final result = await completer.future.timeout(
-        const Duration(seconds: 30),
-        onTimeout: () {
-          debugPrint('[CustomWebOSServiceBridge] callOneReply 타임아웃 (30초)');
-          subscription?.cancel();
-          bridgeInstance.cancel();
-          return <String, dynamic>{
-            'returnValue': false,
-            'errorCode': -1,
-            'errorText': 'Request timeout after 30 seconds',
-          };
-        },
-      );
-      
-      debugPrint('[CustomWebOSServiceBridge] callOneReply 완료: $result');
+      // 원본 코드처럼 WebOSServiceBridge.callOneReply를 직접 호출
+      debugPrint('[CustomWebOSServiceBridge] WebOSServiceBridge.callOneReply 직접 호출');
+      final result = await WebOSServiceBridge.callOneReply(request);
+      debugPrint('[CustomWebOSServiceBridge] callOneReply 응답: $result');
       return result;
     } catch (e, stackTrace) {
       debugPrint('[CustomWebOSServiceBridge] callOneReply 에러: $e');

@@ -26,7 +26,7 @@ export interface UserApp {
 export interface Memo {
   id: number;
   user_id: number;
-  memo_type: 1 | 2;
+  memo_type: 1 | 2 | 3 | 4;
   title: string;
   subtitle: string;
   created_at: Date;
@@ -64,7 +64,7 @@ export interface LoginResponse {
 
 export interface MemoResponse {
   id: number;
-  memoType: 1 | 2;
+  memoType: 1 | 2 | 3 | 4;
   title: string;
   subtitle: string;
   createdAt: string;
@@ -72,7 +72,7 @@ export interface MemoResponse {
 }
 
 export interface CreateMemoRequest {
-  memoType: 1 | 2;
+  memoType: 1 | 2 | 3 | 4;
   title: string;
   subtitle: string;
 }

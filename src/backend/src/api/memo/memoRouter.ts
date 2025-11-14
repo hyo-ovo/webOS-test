@@ -9,7 +9,7 @@ export const memoRegistry = new OpenAPIRegistry();
 
 const MemoResponseSchema = z.object({
   id: z.number(),
-  memoType: z.union([z.literal(1), z.literal(2)]),
+  memoType: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   title: z.string(),
   subtitle: z.string(),
   createdAt: z.string(),
@@ -17,7 +17,7 @@ const MemoResponseSchema = z.object({
 });
 
 const CreateMemoRequestSchema = z.object({
-  memoType: z.union([z.literal(1), z.literal(2)]),
+  memoType: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
   title: z.string().min(1),
   subtitle: z.string().min(1),
 });
@@ -47,7 +47,10 @@ memoRegistry.registerPath({
   tags: ["Memo"],
   summary: "Get a memo by ID",
   security: [{ bearerAuth: [] }],
-  responses: createApiResponse(MemoResponseSchema, "Memo retrieved successfully"),
+  responses: createApiResponse(
+    MemoResponseSchema,
+    "Memo retrieved successfully"
+  ),
 });
 
 // POST /memos

@@ -12,7 +12,7 @@ import type {
 class MemoService {
   async getMemos(
     userId: number,
-    memoType?: 1 | 2
+    memoType?: 1 | 2 | 3 | 4
   ): Promise<ServiceResponse<MemoResponse[] | null>> {
     try {
       const memos = await memoRepository.getMemosByUserId(userId, memoType);
@@ -74,9 +74,9 @@ class MemoService {
     try {
       const { memoType, title, subtitle } = data;
 
-      if (memoType !== 1 && memoType !== 2) {
+      if (memoType !== 1 && memoType !== 2 && memoType !== 3 && memoType !== 4) {
         return ServiceResponse.failure(
-          "memoType must be 1 or 2",
+          "memoType must be 1, 2, 3, or 4",
           null,
           StatusCodes.BAD_REQUEST
         );

@@ -4,7 +4,7 @@ import type { Memo } from "@/common/types";
 class MemoRepository {
   async getMemosByUserId(
     userId: number,
-    memoType?: 1 | 2
+    memoType?: 1 | 2 | 3 | 4
   ): Promise<Memo[]> {
     let sql = "SELECT * FROM memos WHERE user_id = $1";
     const params: any[] = [userId];
@@ -30,7 +30,7 @@ class MemoRepository {
 
   async createMemo(
     userId: number,
-    memoType: 1 | 2,
+    memoType: 1 | 2 | 3 | 4,
     title: string,
     subtitle: string
   ): Promise<Memo> {

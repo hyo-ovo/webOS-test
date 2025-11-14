@@ -24,10 +24,10 @@ class MemoController {
       ? Number.parseInt(req.query.memoType as string)
       : undefined;
 
-    if (memoType !== undefined && memoType !== 1 && memoType !== 2) {
+    if (memoType !== undefined && memoType !== 1 && memoType !== 2 && memoType !== 3 && memoType !== 4) {
       return handleServiceResponse(
         ServiceResponse.failure(
-          "memoType must be 1 or 2",
+          "memoType must be 1, 2, 3, or 4",
           null,
           StatusCodes.BAD_REQUEST
         ),
@@ -37,7 +37,7 @@ class MemoController {
 
     const serviceResponse = await memoService.getMemos(
       userId,
-      memoType as 1 | 2 | undefined
+      memoType as 1 | 2 | 3 | 4 | undefined
     );
     return handleServiceResponse(serviceResponse, res);
   }

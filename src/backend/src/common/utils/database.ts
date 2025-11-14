@@ -106,7 +106,7 @@ export async function initializeDatabase() {
       CREATE TABLE memos (
         id SERIAL PRIMARY KEY,
         user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-        memo_type INTEGER NOT NULL CHECK (memo_type IN (1, 2)),
+        memo_type INTEGER NOT NULL CHECK (memo_type IN (1, 2, 3, 4)),
         title VARCHAR(255) NOT NULL,
         subtitle VARCHAR(255) NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

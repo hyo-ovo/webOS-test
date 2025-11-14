@@ -5,12 +5,13 @@ import {
 import { appsRegistry } from "@/api/apps/appsRouter";
 import { authRegistry } from "@/api/auth/authRouter";
 import { memoRegistry } from "@/api/memo/memoRouter";
+import { env } from "@/common/utils/envConfig";
 
 export type OpenAPIDocument = ReturnType<
   OpenApiGeneratorV3["generateDocument"]
 >;
 
-export function generateOpenAPIDocument(): OpenAPIDocument {
+export function generateOpenAPIDocument(baseUrl?: string): OpenAPIDocument {
   const registry = new OpenAPIRegistry([
     authRegistry,
     appsRegistry,
@@ -18,6 +19,12 @@ export function generateOpenAPIDocument(): OpenAPIDocument {
   ]);
 
   const generator = new OpenApiGeneratorV3(registry.definitions);
+
+  // 서버 URL 결정: baseUrl이 제공되면 사용, 없으면 환경 변수 또는 기본값 사용
+  const serverUrl = baseUrl || process.env.API_BASE_URL || 
+    (env.isProduction 
+      ? `https://${process.env.FLY_APP_NAME || 'webos-backend'}.fly.dev`
+      : `http://${env.HOST}:${env.PORT}`);
 
   const document = generator.generateDocument({
     openapi: "3.0.0",
@@ -28,8 +35,8 @@ export function generateOpenAPIDocument(): OpenAPIDocument {
     },
     servers: [
       {
-        url: "http://localhost:8080",
-        description: "Development server",
+        url: serverUrl,
+        description: env.isProduction ? "Production server" : "Development server",
       },
     ],
     externalDocs: {

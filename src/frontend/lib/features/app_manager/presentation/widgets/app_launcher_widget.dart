@@ -20,6 +20,7 @@ class _AppLauncherWidgetState extends State<AppLauncherWidget> {
   void initState() {
     super.initState();
     _loadInstalledApps();
+    _printRunningApps();
   }
 
   /// Luna API로 실제 설치된 앱 목록 불러오기 + 백엔드에서 순서 적용
@@ -33,9 +34,20 @@ class _AppLauncherWidgetState extends State<AppLauncherWidget> {
         final launchPoints = result['launchPoints'] as List?;
 
         if (launchPoints != null) {
-          List<AppInfo> loadedApps = launchPoints
-              .map((app) => AppInfo.fromJson(app as Map<String, dynamic>))
+          final rawLaunchPoints = launchPoints
+              .map((app) => app as Map<String, dynamic>)
               .toList();
+
+          print('🧾 listLaunchPoints 원본 데이터:');
+          for (final raw in rawLaunchPoints) {
+            print('--- launchPoint ---');
+            raw.forEach((key, value) {
+              print('  $key: $value');
+            });
+          }
+
+          List<AppInfo> loadedApps =
+              rawLaunchPoints.map(AppInfo.fromJson).toList();
 
           // 아이콘 경로 디버깅
           print('📱 로드된 앱 목록 (${loadedApps.length}개):');
@@ -79,6 +91,27 @@ class _AppLauncherWidgetState extends State<AppLauncherWidget> {
         errorMessage = e.toString();
         isLoading = false;
       });
+    }
+  }
+
+  /// 실행 중인 앱 목록을 콘솔에 출력
+  Future<void> _printRunningApps() async {
+    try {
+      final result = await AppManagerService.listApps();
+      if (result?['returnValue'] == true) {
+        final apps = (result?['apps'] as List<dynamic>? ?? [])
+            .cast<Map<String, dynamic>>();
+        print('🧾 현재 실행 중인 앱 (${apps.length}개):');
+        for (final app in apps) {
+          print(
+            '  - id: ${app['id']} / processId: ${app['processId']} / displayId: ${app['displayId']}',
+          );
+        }
+      } else {
+        print('⚠️ listApps 실패: ${result?['errorText']}');
+      }
+    } catch (e) {
+      print('❌ listApps 호출 중 예외 발생: $e');
     }
   }
 

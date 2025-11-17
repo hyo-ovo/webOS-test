@@ -1,73 +1,188 @@
 import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
-import type { Memo } from "@/common/types";
 import { logger } from "@/server";
 import { memoRepository } from "./memoRepository";
+import type {
+  Memo,
+  MemoResponse,
+  CreateMemoRequest,
+  UpdateMemoRequest,
+} from "@/common/types";
 
 class MemoService {
-	async getMemos(userId: number): Promise<ServiceResponse<Memo[] | null>> {
-		try {
-			const memos = await memoRepository.getMemosByUserId(userId);
-			return ServiceResponse.success("메모 조회 성공", memos);
-		} catch (error) {
-			logger.error({ error }, "Get memos error:");
-			return ServiceResponse.failure("메모 조회 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
-		}
-	}
+  async getMemos(
+    userId: number,
+    memoType?: 1 | 2 | 3 | 4
+  ): Promise<ServiceResponse<MemoResponse[] | null>> {
+    try {
+      const memos = await memoRepository.getMemosByUserId(userId, memoType);
+      const response: MemoResponse[] = memos.map((memo) => ({
+        id: memo.id,
+        memoType: memo.memo_type,
+        title: memo.title,
+        subtitle: memo.subtitle,
+        createdAt: memo.created_at.toISOString(),
+        updatedAt: memo.updated_at.toISOString(),
+      }));
+      return ServiceResponse.success("Memos retrieved successfully", response);
+    } catch (error) {
+      logger.error({ error }, "Get memos error");
+      return ServiceResponse.failure(
+        "Failed to retrieve memos",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
-	async createMemo(userId: number, title: string, content: string): Promise<ServiceResponse<Memo | null>> {
-		try {
-			if (content.length > 1024 * 1024) {
-				// 1MB
-				return ServiceResponse.failure("메모 내용이 너무 큽니다 (최대 1MB)", null, StatusCodes.BAD_REQUEST);
-			}
+  async getMemoById(
+    userId: number,
+    memoId: number
+  ): Promise<ServiceResponse<MemoResponse | null>> {
+    try {
+      const memo = await memoRepository.getMemoById(userId, memoId);
+      if (!memo) {
+        return ServiceResponse.failure(
+          "Memo not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+      const response: MemoResponse = {
+        id: memo.id,
+        memoType: memo.memo_type,
+        title: memo.title,
+        subtitle: memo.subtitle,
+        createdAt: memo.created_at.toISOString(),
+        updatedAt: memo.updated_at.toISOString(),
+      };
+      return ServiceResponse.success("Memo retrieved successfully", response);
+    } catch (error) {
+      logger.error({ error }, "Get memo error");
+      return ServiceResponse.failure(
+        "Failed to retrieve memo",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
-			const memo = await memoRepository.createMemo(userId, title, content);
-			return ServiceResponse.success("메모 생성 성공", memo);
-		} catch (error) {
-			logger.error({ error }, "Create memo error:");
-			return ServiceResponse.failure("메모 생성 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
-		}
-	}
+  async createMemo(
+    userId: number,
+    data: CreateMemoRequest
+  ): Promise<ServiceResponse<MemoResponse | null>> {
+    try {
+      const { memoType, title, subtitle } = data;
 
-	async updateMemo(
-		userId: number,
-		memoId: number,
-		title: string,
-		content: string,
-	): Promise<ServiceResponse<Memo | null>> {
-		try {
-			if (content.length > 1024 * 1024) {
-				return ServiceResponse.failure("메모 내용이 너무 큽니다 (최대 1MB)", null, StatusCodes.BAD_REQUEST);
-			}
+      if (memoType !== 1 && memoType !== 2 && memoType !== 3 && memoType !== 4) {
+        return ServiceResponse.failure(
+          "memoType must be 1, 2, 3, or 4",
+          null,
+          StatusCodes.BAD_REQUEST
+        );
+      }
 
-			const memo = await memoRepository.updateMemo(userId, memoId, title, content);
+      const memo = await memoRepository.createMemo(
+        userId,
+        memoType,
+        title,
+        subtitle
+      );
 
-			if (!memo) {
-				return ServiceResponse.failure("메모를 찾을 수 없습니다", null, StatusCodes.NOT_FOUND);
-			}
+      const response: MemoResponse = {
+        id: memo.id,
+        memoType: memo.memo_type,
+        title: memo.title,
+        subtitle: memo.subtitle,
+        createdAt: memo.created_at.toISOString(),
+        updatedAt: memo.updated_at.toISOString(),
+      };
 
-			return ServiceResponse.success("메모 수정 성공", memo);
-		} catch (error) {
-			logger.error({ error }, "Update memo error:");
-			return ServiceResponse.failure("메모 수정 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
-		}
-	}
+      return ServiceResponse.success(
+        "Memo created successfully",
+        response,
+        StatusCodes.CREATED
+      );
+    } catch (error) {
+      logger.error({ error }, "Create memo error");
+      return ServiceResponse.failure(
+        "Failed to create memo",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
-	async deleteMemo(userId: number, memoId: number): Promise<ServiceResponse<{ id: number } | null>> {
-		try {
-			const deleted = await memoRepository.deleteMemo(userId, memoId);
+  async updateMemo(
+    userId: number,
+    memoId: number,
+    data: UpdateMemoRequest
+  ): Promise<ServiceResponse<MemoResponse | null>> {
+    try {
+      const { title, subtitle } = data;
 
-			if (!deleted) {
-				return ServiceResponse.failure("메모를 찾을 수 없습니다", null, StatusCodes.NOT_FOUND);
-			}
+      const memo = await memoRepository.updateMemo(
+        userId,
+        memoId,
+        title,
+        subtitle
+      );
 
-			return ServiceResponse.success("메모 삭제 성공", { id: memoId });
-		} catch (error) {
-			logger.error({ error }, "Delete memo error:");
-			return ServiceResponse.failure("메모 삭제 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
-		}
-	}
+      if (!memo) {
+        return ServiceResponse.failure(
+          "Memo not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+
+      const response: MemoResponse = {
+        id: memo.id,
+        memoType: memo.memo_type,
+        title: memo.title,
+        subtitle: memo.subtitle,
+        createdAt: memo.created_at.toISOString(),
+        updatedAt: memo.updated_at.toISOString(),
+      };
+
+      return ServiceResponse.success("Memo updated successfully", response);
+    } catch (error) {
+      logger.error({ error }, "Update memo error");
+      return ServiceResponse.failure(
+        "Failed to update memo",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  async deleteMemo(
+    userId: number,
+    memoId: number
+  ): Promise<ServiceResponse<{ success: boolean } | null>> {
+    try {
+      const deleted = await memoRepository.deleteMemo(userId, memoId);
+
+      if (!deleted) {
+        return ServiceResponse.failure(
+          "Memo not found",
+          null,
+          StatusCodes.NOT_FOUND
+        );
+      }
+
+      return ServiceResponse.success("Memo deleted successfully", {
+        success: true,
+      });
+    } catch (error) {
+      logger.error({ error }, "Delete memo error");
+      return ServiceResponse.failure(
+        "Failed to delete memo",
+        null,
+        StatusCodes.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 }
 
 export const memoService = new MemoService();

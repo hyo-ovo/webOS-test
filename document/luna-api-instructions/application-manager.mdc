@@ -1,0 +1,495 @@
+**_ Begin Patch
+_** Create File: /Users/Inyoung/Desktop/26-2/lg-capstone/2025_sogang_6/document/luna-api-instructions/application-manager.md
+@@
+
+```markdown
+# Application Manager (통합형 문서)
+
+serviceUri: luna://com.webos.service.applicationmanager
+
+description: |
+  애플리케이션 관리 서비스입니다. 앱 실행, 종료, 설치된 앱 목록 조회, 실행 중인 앱 목록 조회 등의 기능을 제공합니다.
+  홈 화면에서 다른 앱을 실행하거나 앱 목록을 관리할 때 사용됩니다.
+
+schema:
+  - title: Application Manager
+    serviceUri: luna://com.webos.service.applicationmanager
+    methods:
+
+      - name: launch
+        description: 지정된 앱을 실행합니다. appId를 사용하여 설치된 앱을 시작할 수 있습니다.
+        parameters:
+          - name: id
+            type: string
+            required: true
+            description: 실행할 앱의 애플리케이션 ID (예: "com.webos.app.browser")
+          - name: params
+            type: object
+            required: false
+            description: 앱에 전달할 추가 파라미터
+        payloadExample: |
+          {
+            "id": "com.webos.app.browser",
+            "params": {
+              "target": "https://www.example.com"
+            }
+          }
+        returnExample: |
+          {
+            "returnValue": true,
+            "appId": "com.webos.app.browser",
+            "displayId": 0,
+            "instanceId": "abc12345"
+          }
+        errorReference:
+          - code: -1
+            message: Invalid parameters
+          - code: -2
+            message: App not found
+        usage:
+          - exampleJS: |
+              var request = webOS.service.request('luna://com.webos.service.applicationmanager', {
+                method: 'launch',
+                parameters: {
+                  id: 'com.webos.app.browser',
+                  params: { target: 'https://www.google.com' }
+                },
+                onSuccess: function(response) {
+                  console.log('App launched successfully');
+                  console.log('Instance ID:', response.instanceId);
+                },
+                onFailure: function(error) {
+                  console.log('Failed to launch app');
+                  console.log('[' + error.errorCode + ']: ' + error.errorText);
+                }
+              });
+
+      - name: listLaunchPoints
+        description: 설치된 앱의 런치 포인트(실행 가능한 앱) 목록을 조회합니다. 홈 화면에 표시할 앱 목록을 가져올 때 사용합니다.
+        parameters:
+          - name: subscribe
+            type: boolean
+            required: false
+            description: true일 경우 앱 설치/제거 시 업데이트를 구독합니다 (기본 false)
+        payloadExample: |
+          {
+            "subscribe": false
+          }
+        returnExample: |
+          {
+            "returnValue": true,
+            "launchPoints": [
+              {
+                "id": "com.webos.app.browser",
+                "launchPointId": "com.webos.app.browser_default",
+                "title": "Web Browser",
+                "icon": "/usr/palm/applications/com.webos.app.browser/icon.png",
+                "iconColor": "#FFFFFF",
+                "bgColor": "#000000",
+                "bgImage": "",
+                "imageForRecents": "",
+                "largeIcon": "/usr/palm/applications/com.webos.app.browser/largeIcon.png",
+                "appDescription": "Browse the web",
+                "params": {}
+              },
+              {
+                "id": "com.webos.app.settings",
+                "launchPointId": "com.webos.app.settings_default",
+                "title": "Settings",
+                "icon": "/usr/palm/applications/com.webos.app.settings/icon.png",
+                "iconColor": "#FFFFFF",
+                "bgColor": "#1a1a1a",
+                "bgImage": "",
+                "imageForRecents": "",
+                "largeIcon": "/usr/palm/applications/com.webos.app.settings/largeIcon.png",
+                "appDescription": "Configure your TV",
+                "params": {}
+              }
+            ]
+          }
+        subscriptionReturnExample: |
+          {
+            "returnValue": true,
+            "subscribed": true,
+            "launchPoints": [...]
+          }
+        notes: |
+          - 각 launchPoint는 앱의 실행 진입점을 나타냅니다.
+          - 하나의 앱이 여러 launchPoint를 가질 수 있습니다 (예: 다른 모드로 실행).
+          - subscribe를 true로 설정하면 앱 설치/제거 시 자동으로 업데이트된 목록을 받습니다.
+        usage:
+          - exampleJS: |
+              var request = webOS.service.request('luna://com.webos.service.applicationmanager', {
+                method: 'listLaunchPoints',
+                parameters: {
+                  subscribe: true
+                },
+                onSuccess: function(response) {
+                  console.log('Launch points:', response.launchPoints);
+                  response.launchPoints.forEach(function(app) {
+                    console.log('App:', app.title, '(ID:', app.id + ')');
+                  });
+                },
+                onFailure: function(error) {
+                  console.log('Failed to get launch points');
+                  console.log('[' + error.errorCode + ']: ' + error.errorText);
+                }
+              });
+
+      - name: listApps
+        description: 현재 실행 중인 앱의 목록을 조회합니다.
+        parameters:
+          - name: subscribe
+            type: boolean
+            required: false
+            description: true일 경우 앱 실행/종료 시 업데이트를 구독합니다 (기본 false)
+        payloadExample: |
+          {
+            "subscribe": false
+          }
+        returnExample: |
+          {
+            "returnValue": true,
+            "apps": [
+              {
+                "id": "com.webos.app.browser",
+                "displayId": 0,
+                "processId": "1234",
+                "webprocessid": "5678",
+                "defaultWindowType": "card",
+                "appType": "web"
+              },
+              {
+                "id": "com.webos.app.home",
+                "displayId": 0,
+                "processId": "1000",
+                "webprocessid": "2000",
+                "defaultWindowType": "overlay",
+                "appType": "web"
+              }
+            ]
+          }
+        subscriptionReturnExample: |
+          {
+            "returnValue": true,
+            "subscribed": true,
+            "apps": [...]
+          }
+        usage:
+          - exampleJS: |
+              var request = webOS.service.request('luna://com.webos.service.applicationmanager', {
+                method: 'listApps',
+                parameters: {
+                  subscribe: true
+                },
+                onSuccess: function(response) {
+                  console.log('Running apps:', response.apps);
+                  console.log('Total running apps:', response.apps.length);
+                },
+                onFailure: function(error) {
+                  console.log('Failed to get running apps');
+                }
+              });
+
+      - name: close
+        description: 실행 중인 앱을 종료합니다.
+        parameters:
+          - name: id
+            type: string
+            required: true
+            description: 종료할 앱의 애플리케이션 ID
+          - name: instanceId
+            type: string
+            required: false
+            description: 종료할 앱의 특정 인스턴스 ID (미지정 시 해당 앱의 모든 인스턴스 종료)
+        payloadExample: |
+          {
+            "id": "com.webos.app.browser",
+            "instanceId": "abc12345"
+          }
+        returnExample: |
+          {
+            "returnValue": true
+          }
+        errorReference:
+          - code: -1
+            message: Invalid parameters
+          - code: -2
+            message: App not found or not running
+        usage:
+          - exampleJS: |
+              var request = webOS.service.request('luna://com.webos.service.applicationmanager', {
+                method: 'close',
+                parameters: {
+                  id: 'com.webos.app.browser'
+                },
+                onSuccess: function(response) {
+                  console.log('App closed successfully');
+                },
+                onFailure: function(error) {
+                  console.log('Failed to close app');
+                  console.log('[' + error.errorCode + ']: ' + error.errorText);
+                }
+              });
+
+      - name: getForegroundAppInfo
+        description: 현재 포그라운드에서 실행 중인 앱의 정보를 조회합니다.
+        parameters:
+          - name: subscribe
+            type: boolean
+            required: false
+            description: true일 경우 포그라운드 앱 변경 시 업데이트를 구독합니다
+          - name: extraInfo
+            type: boolean
+            required: false
+            description: true일 경우 추가 정보를 포함합니다
+        payloadExample: |
+          {
+            "subscribe": true,
+            "extraInfo": true
+          }
+        returnExample: |
+          {
+            "returnValue": true,
+            "appId": "com.webos.app.browser",
+            "processId": "1234",
+            "windowId": "5678",
+            "windowType": "card"
+          }
+        usage:
+          - exampleJS: |
+              var request = webOS.service.request('luna://com.webos.service.applicationmanager', {
+                method: 'getForegroundAppInfo',
+                parameters: {
+                  subscribe: true,
+                  extraInfo: true
+                },
+                onSuccess: function(response) {
+                  console.log('Foreground app:', response.appId);
+                },
+                onFailure: function(error) {
+                  console.log('Failed to get foreground app info');
+                }
+              });
+
+objects:
+  - name: LaunchPoint
+    description: 앱의 실행 진입점 정보
+    properties:
+      - name: id
+        type: string
+        description: 애플리케이션 ID
+      - name: launchPointId
+        type: string
+        description: 런치 포인트 고유 ID
+      - name: title
+        type: string
+        description: 앱 표시 이름
+      - name: icon
+        type: string
+        description: 앱 아이콘 경로
+      - name: iconColor
+        type: string
+        description: 아이콘 색상 (hex)
+        optional: true
+      - name: bgColor
+        type: string
+        description: 배경 색상 (hex)
+        optional: true
+      - name: bgImage
+        type: string
+        description: 배경 이미지 경로
+        optional: true
+      - name: largeIcon
+        type: string
+        description: 큰 아이콘 경로
+        optional: true
+      - name: appDescription
+        type: string
+        description: 앱 설명
+        optional: true
+      - name: params
+        type: object
+        description: 실행 시 전달될 파라미터
+        optional: true
+
+  - name: RunningApp
+    description: 실행 중인 앱 정보
+    properties:
+      - name: id
+        type: string
+        description: 애플리케이션 ID
+      - name: displayId
+        type: number
+        description: 디스플레이 ID
+      - name: processId
+        type: string
+        description: 프로세스 ID
+      - name: webprocessid
+        type: string
+        description: 웹 프로세스 ID
+        optional: true
+      - name: defaultWindowType
+        type: string
+        description: 윈도우 타입 (card, overlay 등)
+      - name: appType
+        type: string
+        description: 앱 타입 (web, native, qml 등)
+
+notes: |
+  - **권한 요구사항**: appinfo.json에서 `applications.management`, `applications.launch` 권한이 필요할 수 있습니다.
+  - **앱 순서 관리**: listLaunchPoints로 가져온 앱 목록의 순서는 사용자별로 데이터베이스에 저장하여 관리하는 것을 권장합니다.
+  - **구독 해제**: 구독을 중단하려면 요청 객체의 `cancel()` 메서드를 호출하세요.
+  - **인스턴스 ID**: 같은 앱을 여러 번 실행할 수 있으며, 각 인스턴스는 고유한 instanceId를 갖습니다.
+
+useCases:
+  - name: 홈 화면에서 앱 그리드 표시
+    description: |
+      1. listLaunchPoints를 호출하여 설치된 앱 목록을 가져옵니다.
+      2. 데이터베이스에서 사용자별 앱 순서를 조회합니다.
+      3. 앱 목록을 순서에 맞게 정렬하여 그리드로 표시합니다.
+      4. 사용자가 앱을 클릭하면 launch 메서드를 호출하여 앱을 실행합니다.
+
+  - name: 앱 순서 변경 및 저장
+    description: |
+      1. 사용자가 Drag & Drop으로 앱 순서를 변경합니다.
+      2. 변경된 순서를 데이터베이스에 저장합니다 (Backend API 호출).
+      3. 다음 로그인 시 저장된 순서대로 앱이 표시됩니다.
+
+  - name: 실행 중인 앱 모니터링
+    description: |
+      1. listApps를 subscribe=true로 호출합니다.
+      2. 앱 실행/종료 시 자동으로 업데이트된 목록을 받습니다.
+      3. UI에 실행 중인 앱을 표시하여 사용자가 관리할 수 있게 합니다.
+
+integrationExample: |
+  # Flutter Platform Channel 통합 예제
+
+  ## Dart (Frontend)
+  ```dart
+  import 'package:flutter/services.dart';
+
+  class WebOSAppManager {
+    static const platform = MethodChannel('com.example.webos/app_manager');
+
+    Future<bool> launchApp(String appId, {Map<String, dynamic>? params}) async {
+      try {
+        final result = await platform.invokeMethod('launchApp', {
+          'appId': appId,
+          'params': params ?? {},
+        });
+        return result;
+      } catch (e) {
+        print('Error launching app: $e');
+        return false;
+      }
+    }
+
+    Future<List<Map<String, dynamic>>> getInstalledApps() async {
+      try {
+        final List<dynamic> apps = await platform.invokeMethod('getInstalledApps');
+        return apps.cast<Map<String, dynamic>>();
+      } catch (e) {
+        print('Error getting apps: $e');
+        return [];
+      }
+    }
+  }
+  ```
+
+  ## C++ (Native Runner)
+  ```cpp
+  #include <luna-service2/lunaservice.h>
+
+  // Callback for launch response
+  static bool LaunchCallback(LSHandle* sh, LSMessage* message, void* ctx) {
+      LSMessageRef(message);
+      const char* payload = LSMessageGetPayload(message);
+      // Parse JSON and handle response
+      LSMessageUnref(message);
+      return true;
+  }
+
+  // Launch app function
+  bool LaunchApp(const char* appId, const char* params) {
+      LSError lserror;
+      LSErrorInit(&lserror);
+      
+      LSHandle *sh = nullptr;
+      if (!LSRegister(nullptr, &sh, &lserror)) {
+          LSErrorPrint(&lserror, stderr);
+          LSErrorFree(&lserror);
+          return false;
+      }
+      
+      char payload[512];
+      if (params && strlen(params) > 0) {
+          snprintf(payload, sizeof(payload), 
+                   "{\"id\":\"%s\",\"params\":%s}", appId, params);
+      } else {
+          snprintf(payload, sizeof(payload), 
+                   "{\"id\":\"%s\"}", appId);
+      }
+      
+      bool result = LSCallOneReply(sh,
+                                    "luna://com.webos.service.applicationmanager/launch",
+                                    payload,
+                                    LaunchCallback,
+                                    nullptr,
+                                    nullptr,
+                                    &lserror);
+      
+      if (!result) {
+          LSErrorPrint(&lserror, stderr);
+          LSErrorFree(&lserror);
+      }
+      
+      LSUnregister(sh, &lserror);
+      return result;
+  }
+
+  // List launch points function
+  bool GetInstalledApps() {
+      LSError lserror;
+      LSErrorInit(&lserror);
+      
+      LSHandle *sh = nullptr;
+      if (!LSRegister(nullptr, &sh, &lserror)) {
+          return false;
+      }
+      
+      const char* payload = "{}";
+      
+      bool result = LSCallOneReply(sh,
+                                    "luna://com.webos.service.applicationmanager/listLaunchPoints",
+                                    payload,
+                                    ListAppsCallback,
+                                    nullptr,
+                                    nullptr,
+                                    &lserror);
+      
+      if (!result) {
+          LSErrorPrint(&lserror, stderr);
+          LSErrorFree(&lserror);
+      }
+      
+      LSUnregister(sh, &lserror);
+      return result;
+  }
+  ```
+
+errors: |
+  - 실패 시 응답에 `returnValue: false`와 함께 `errorCode`/`errorText`가 포함됩니다.
+  - 일반적인 에러 코드:
+    - `-1`: Invalid parameters (잘못된 파라미터)
+    - `-2`: App not found (앱을 찾을 수 없음)
+    - `-3`: Permission denied (권한 없음)
+    - `-4`: Already running (이미 실행 중)
+
+references:
+  - webOS TV Developer Portal: https://webostv.developer.lge.com
+  - Luna Service API Guide: https://webostv.developer.lge.com/develop/references/luna-service-introduction
+  - Flutter Platform Channels: https://docs.flutter.dev/platform-integration/platform-channels
+```
+
+\*\*\* End Patch

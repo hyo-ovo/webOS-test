@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/media_control/media_control.dart';
 import 'package:frontend/features/weather_clock_display/presentation/info_section.dart';
+import 'package:frontend/features/app_manager/presentation/widgets/app_launcher_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -39,7 +40,7 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 36),
-                    const _AppDock(),
+                    const AppLauncherWidget(),
                   ],
                 ),
               ),
@@ -460,99 +461,7 @@ class _VerticalBadge extends StatelessWidget {
   }
 }
 
-class _AppDock extends StatelessWidget {
-  const _AppDock();
 
-  static final List<_DockItem> _items = [
-    _DockItem(icon: Icons.movie_outlined, label: 'Disney+', color: const Color(0xFF0E7FE1)),
-    _DockItem(icon: Icons.movie_outlined, label: 'Disney+', color: const Color(0xFF0E7FE1)),
-    _DockItem(icon: Icons.ondemand_video_rounded, label: 'Netflix', color: Colors.red),
-    _DockItem(icon: Icons.movie_outlined, label: 'Disney+', color: const Color(0xFF0E7FE1)),
-    _DockItem(icon: Icons.video_library_rounded, label: 'YouTube', color: Colors.redAccent),
-    _DockItem(icon: Icons.play_circle_fill_rounded, label: 'Play', color: const Color(0xFF6F9CFF)),
-    _DockItem(icon: Icons.web_rounded, label: 'Wavve', color: const Color(0xFFBF3EFF)),
-    _DockItem(icon: Icons.grid_view_rounded, label: 'Apps', color: const Color(0xFF4A90E2)),
-    _DockItem(icon: Icons.photo_rounded, label: 'Gallery', color: const Color(0xFFFF6F91)),
-    _DockItem(icon: Icons.photo_rounded, label: 'Gallery', color: const Color(0xFFFF6F91)),
-    _DockItem(icon: Icons.add_rounded, label: '추가', color: const Color(0xFFE0E3EC)),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 28,
-            offset: const Offset(0, 24),
-          ),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          for (final _DockItem item in _items) _DockIcon(item: item),
-        ],
-      ),
-    );
-  }
-}
-
-class _DockItem {
-  const _DockItem({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  final IconData icon;
-  final String label;
-  final Color color;
-}
-
-class _DockIcon extends StatelessWidget {
-  const _DockIcon({required this.item});
-
-  final _DockItem item;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 68,
-          height: 68,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                item.color.withOpacity(0.18),
-                item.color.withOpacity(0.32),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(22),
-          ),
-          child: Icon(item.icon, size: 32, color: item.color),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          item.label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF6E7281),
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _SearchField extends StatelessWidget {
   const _SearchField();

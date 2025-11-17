@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'features/app_manager/presentation/widgets/app_launcher_widget.dart';
 import 'features/user_login/presentation/initial_screen.dart';
 
 class MyApp extends StatelessWidget {

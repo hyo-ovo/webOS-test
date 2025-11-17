@@ -31,7 +31,20 @@ dependencies:
   flutter:
     sdk: flutter
 
-  # HTTP client for API calls
+  # webOS Service Bridge for Luna API calls
+  webos_service_bridge:
+    git:
+      url: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
+      path: plugins/packages/webos_service_bridge
+      ref: main
+  video_player: ^2.9.2
+  video_player_webos:
+    git:
+      url: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
+      path: plugins/packages/video_player
+      ref: main
+
+  # HTTP client for backend API calls
   http: ^1.1.0
 
   # Local storage

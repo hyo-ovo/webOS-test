@@ -1,37 +1,24 @@
-import type { Request, Response } from "express";
-import { StatusCodes } from "http-status-codes";
-import { ServiceResponse } from "@/common/models/serviceResponse";
-import { handleServiceResponse } from "@/common/utils/httpHandlers";
+import type { Request, RequestHandler, Response } from "express";
 import { authService } from "./authService";
+import { handleServiceResponse } from "@/common/utils/httpHandlers";
+import type { SignupRequest, LoginRequest } from "@/common/types";
 
 class AuthController {
-	public async faceLogin(req: Request, res: Response) {
-		if (!req.file) {
-			const response = ServiceResponse.failure("이미지 파일이 필요합니다", null, StatusCodes.BAD_REQUEST);
-			return handleServiceResponse(response, res);
-		}
+  public signup: RequestHandler = async (req: Request, res: Response) => {
+    const { name, password, isChild } = req.body as SignupRequest;
+    const serviceResponse = await authService.signup({
+      name,
+      password,
+      isChild: isChild ?? false,
+    });
+    return handleServiceResponse(serviceResponse, res);
+  };
 
-		const imageBuffer = req.file.buffer;
-		const serviceResponse = await authService.faceLogin(imageBuffer);
-		return handleServiceResponse(serviceResponse, res);
-	}
-
-	public async registerFace(req: Request, res: Response) {
-		if (!req.file) {
-			const response = ServiceResponse.failure("이미지 파일이 필요합니다", null, StatusCodes.BAD_REQUEST);
-			return handleServiceResponse(response, res);
-		}
-
-		const { username } = req.body;
-		if (!username) {
-			const response = ServiceResponse.failure("사용자 이름이 필요합니다", null, StatusCodes.BAD_REQUEST);
-			return handleServiceResponse(response, res);
-		}
-
-		const imageBuffer = req.file.buffer;
-		const serviceResponse = await authService.registerFace(username, imageBuffer);
-		return handleServiceResponse(serviceResponse, res);
-	}
+  public login: RequestHandler = async (req: Request, res: Response) => {
+    const { name, password } = req.body as LoginRequest;
+    const serviceResponse = await authService.login({ name, password });
+    return handleServiceResponse(serviceResponse, res);
+  };
 }
 
 export const authController = new AuthController();

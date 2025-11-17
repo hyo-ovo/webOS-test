@@ -1,57 +1,51 @@
-import { query } from "@/common/utils/database";
+import { pool } from "@/common/utils/database";
+import bcrypt from "bcryptjs";
+import type { User } from "@/common/types";
 
-interface User {
-	id: number;
-	username: string;
-	face_encoding: string;
-	created_at: Date;
-	updated_at: Date;
+export interface UserWithPassword extends User {
+  password_hash: string;
 }
 
-class AuthRepository {
-	async findUserByFaceEncoding(faceEncoding: string): Promise<User | null> {
-		// TODO: 실제로는 벡터 유사도 검색 필요 (pgvector 등)
-		const result = await query("SELECT * FROM users WHERE face_encoding = $1 LIMIT 1", [faceEncoding]);
+export class AuthRepository {
+  async createUser(
+    name: string,
+    passwordHash: string,
+    isChild: boolean
+  ): Promise<Omit<User, "password_hash">> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        `INSERT INTO users (name, password_hash, is_child) 
+         VALUES ($1, $2, $3) 
+         RETURNING id, name, is_child, created_at, updated_at`,
+        [name, passwordHash, isChild]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
 
-		if (result.rows.length === 0) {
-			return null;
-		}
+  async findByName(name: string): Promise<UserWithPassword | null> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        `SELECT id, name, password_hash, is_child, created_at, updated_at 
+         FROM users WHERE name = $1`,
+        [name]
+      );
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
+  }
 
-		return result.rows[0] as User;
-	}
-
-	async findUserByUsername(username: string): Promise<User | null> {
-		const result = await query("SELECT * FROM users WHERE username = $1 LIMIT 1", [username]);
-
-		if (result.rows.length === 0) {
-			return null;
-		}
-
-		return result.rows[0] as User;
-	}
-
-	async findUserById(userId: number): Promise<User | null> {
-		const result = await query("SELECT * FROM users WHERE id = $1 LIMIT 1", [userId]);
-
-		if (result.rows.length === 0) {
-			return null;
-		}
-
-		return result.rows[0] as User;
-	}
-
-	async getAllUsers(): Promise<Array<{ id: number; username: string; face_encoding: string }>> {
-		const result = await query("SELECT id, username, face_encoding FROM users");
-		return result.rows;
-	}
-
-	async createUser(username: string, faceEncoding: string): Promise<number> {
-		const result = await query("INSERT INTO users (username, face_encoding) VALUES ($1, $2) RETURNING id", [
-			username,
-			faceEncoding,
-		]);
-		return result.rows[0].id;
-	}
+  async verifyPassword(
+    plainPassword: string,
+    hashedPassword: string
+  ): Promise<boolean> {
+    return bcrypt.compare(plainPassword, hashedPassword);
+  }
 }
 
 export const authRepository = new AuthRepository();

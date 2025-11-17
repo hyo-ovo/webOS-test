@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'features/app_manager/presentation/widgets/app_launcher_widget.dart';
+import 'features/user_login/presentation/initial_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -12,98 +13,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigoAccent),
         useMaterial3: true,
-      ),
-      home: const SplashHome(),
-    );
-  }
-}
-
-class SplashHome extends StatefulWidget {
-  const SplashHome({super.key});
-
-  @override
-  State<SplashHome> createState() => _SplashHomeState();
-}
-
-class _SplashHomeState extends State<SplashHome>
-    with SingleTickerProviderStateMixin {
-  double _opacity = 0;
-  late AnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller =
-        AnimationController(vsync: this, duration: const Duration(seconds: 2));
-
-    // 간단한 페이드 인 애니메이션
-    _controller.addListener(() {
-      setState(() {
-        _opacity = _controller.value;
-      });
-    });
-
-    // 시작 시 자동 실행
-    _controller.forward();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme color = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      backgroundColor: color.surface,
-      body: Center(
-        child: AnimatedOpacity(
-          opacity: _opacity,
-          duration: const Duration(milliseconds: 500),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.tv_rounded, size: 120, color: color.primary),
-              const SizedBox(height: 30),
-              Text(
-                'webOS Home Screen',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: color.onSurface,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'flutter-webOS prototype running',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: color.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 40),
-              // 앱 런처 위젯 추가
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: AppLauncherWidget(),
-              ),
-              const SizedBox(height: 20),
-              AnimatedContainer(
-                duration: const Duration(seconds: 1),
-                width: _opacity * 100 + 50,
-                height: 6,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4),
-                  color: color.primary.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
+        fontFamily: 'Pretendard', // Pretendard 기본 폰트 설정
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.bold),
+          displayMedium: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w600),
+          bodyLarge: TextStyle(fontFamily: 'Pretendard'),
+          bodyMedium: TextStyle(fontFamily: 'Pretendard'),
+          labelLarge: TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w500),
         ),
       ),
+      home: const InitialScreen(),
     );
   }
 }

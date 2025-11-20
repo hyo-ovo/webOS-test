@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/media_control/media_control.dart';
+import 'package:frontend/features/memo_pad/presentation/widgets/memo_board_widget.dart';
 import 'package:frontend/features/weather_clock_display/presentation/info_section.dart';
 import 'package:frontend/features/app_manager/presentation/widgets/app_launcher_widget.dart';
 import 'package:frontend/features/system_volume/presentation/widgets/volume_control_widget.dart';
@@ -33,10 +34,7 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           SizedBox(width: 32),
-                          Expanded(
-                            flex: 5,
-                            child: _MemoBoardWithBadge(),
-                          ),
+                          Expanded(flex: 5, child: _MemoBoardWithBadge()),
                         ],
                       ),
                     ),
@@ -61,17 +59,9 @@ class _TopHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: const [
-        Expanded(
-          flex: 4,
-          child: ResponsiveInfoSection(cityName: 'Seoul'),
-        ),
+        Expanded(flex: 4, child: ResponsiveInfoSection(cityName: 'Seoul')),
         SizedBox(width: 32),
-        Expanded(
-          flex: 5,
-          child: VolumeControlWidget(
-            height: 80,
-          ),
-        ),
+        Expanded(flex: 5, child: VolumeControlWidget(height: 80)),
         SizedBox(width: 32),
         _ProfileSummary(),
       ],
@@ -199,14 +189,16 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _launchNativePlayback({bool auto = false}) async {
     final timestamp = DateTime.now().toString();
-    debugPrint('[HomeScreen] [$timestamp] _launchNativePlayback called (auto: $auto)');
+    debugPrint(
+      '[HomeScreen] [$timestamp] _launchNativePlayback called (auto: $auto)',
+    );
     debugPrint('[HomeScreen] [$timestamp] videoUrl: ${widget.videoUrl}');
 
     if (_openingMedia) {
@@ -218,23 +210,33 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
       debugPrint('[HomeScreen] [$timestamp] Calling mediaService.open()...');
       final sessionId = await _mediaService.open(widget.videoUrl);
       final afterOpenTimestamp = DateTime.now().toString();
-      debugPrint('[HomeScreen] [$afterOpenTimestamp] mediaService.open() returned: $sessionId');
+      debugPrint(
+        '[HomeScreen] [$afterOpenTimestamp] mediaService.open() returned: $sessionId',
+      );
 
       if (!mounted) {
-        debugPrint('[HomeScreen] [$afterOpenTimestamp] Widget not mounted, returning');
+        debugPrint(
+          '[HomeScreen] [$afterOpenTimestamp] Widget not mounted, returning',
+        );
         return;
       }
       if (sessionId == null) {
-        debugPrint('[HomeScreen] [$afterOpenTimestamp] sessionId is null - open failed');
+        debugPrint(
+          '[HomeScreen] [$afterOpenTimestamp] sessionId is null - open failed',
+        );
         if (!auto) {
           _showMessage('영상 재생을 시작하지 못했어요.');
         }
       } else {
         _mediaSessionId = sessionId;
-        debugPrint('[HomeScreen] [$afterOpenTimestamp] Calling mediaService.play()...');
+        debugPrint(
+          '[HomeScreen] [$afterOpenTimestamp] Calling mediaService.play()...',
+        );
         await _mediaService.play(sessionId);
         final afterPlayTimestamp = DateTime.now().toString();
-        debugPrint('[HomeScreen] [$afterPlayTimestamp] mediaService.play() completed');
+        debugPrint(
+          '[HomeScreen] [$afterPlayTimestamp] mediaService.play() completed',
+        );
         if (mounted && !auto) {
           _showMessage('TV에서 영상 재생을 시작했어요.');
         }
@@ -242,7 +244,9 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
     } catch (error) {
       final errorTimestamp = DateTime.now().toString();
       debugPrint('[HomeScreen] [$errorTimestamp] ERROR: $error');
-      debugPrint('[HomeScreen] [$errorTimestamp] Error type: ${error.runtimeType}');
+      debugPrint(
+        '[HomeScreen] [$errorTimestamp] Error type: ${error.runtimeType}',
+      );
       if (mounted && !auto) {
         _showMessage('영상 재생 중 오류가 발생했어요.');
       }
@@ -250,7 +254,9 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
       if (mounted) {
         setState(() => _openingMedia = false);
         final finalTimestamp = DateTime.now().toString();
-        debugPrint('[HomeScreen] [$finalTimestamp] _launchNativePlayback completed');
+        debugPrint(
+          '[HomeScreen] [$finalTimestamp] _launchNativePlayback completed',
+        );
       }
     }
   }
@@ -273,12 +279,8 @@ class _MemoBoardWithBadge extends StatelessWidget {
     return Stack(
       clipBehavior: Clip.none,
       children: const [
-        _MemoBoard(),
-        Positioned(
-          top: 46,
-          right: -30,
-          child: _VerticalBadge(label: '빈버드'),
-        ),
+        MemoBoardWidget(),
+        Positioned(top: 46, right: -30, child: _VerticalBadge(label: '빈버드')),
       ],
     );
   }
@@ -303,123 +305,6 @@ class _TagChip extends StatelessWidget {
           color: Color(0xFF5F6372),
           fontWeight: FontWeight.w600,
         ),
-      ),
-    );
-  }
-}
-
-class _MemoBoard extends StatelessWidget {
-  const _MemoBoard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(28),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 28,
-            offset: const Offset(0, 22),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
-          Row(
-            children: [
-              Text(
-                '메모하기',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1E1F25),
-                ),
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.edit_note_rounded, color: Color(0xFF9AA0AF)),
-            ],
-          ),
-          SizedBox(height: 24),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: _MemoSticky(
-                    title: '할일 메모',
-                    content: '할일 정기 어쩌구',
-                    color: Color(0xFF6DE4A5),
-                  ),
-                ),
-                SizedBox(width: 18),
-                Expanded(
-                  child: _MemoSticky(
-                    title: '아이디어',
-                    content: '',
-                    color: Color(0xFFFFE28B),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MemoSticky extends StatelessWidget {
-  const _MemoSticky({
-    required this.title,
-    required this.content,
-    required this.color,
-  });
-
-  final String title;
-  final String content;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 18,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-              color: Color(0xFF272B33),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Text(
-              content,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-                color: Color(0xFF3B3F46),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -464,8 +349,6 @@ class _VerticalBadge extends StatelessWidget {
   }
 }
 
-
-
 class _SearchField extends StatelessWidget {
   const _SearchField();
 
@@ -491,10 +374,7 @@ class _SearchField extends StatelessWidget {
           readOnly: true,
           decoration: InputDecoration(
             hintText: '무엇을 도와드릴까요?',
-            hintStyle: TextStyle(
-              color: colors.onSurfaceVariant,
-              fontSize: 16,
-            ),
+            hintStyle: TextStyle(color: colors.onSurfaceVariant, fontSize: 16),
             border: InputBorder.none,
             prefixIcon: const Padding(
               padding: EdgeInsets.symmetric(horizontal: 18),
@@ -550,18 +430,12 @@ class _ProfileSummary extends StatelessWidget {
             children: const [
               Text(
                 '홍길동',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 16,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
               ),
               SizedBox(height: 6),
               Text(
                 '다른 계정으로 전환하기',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF7B7F8E),
-                ),
+                style: TextStyle(fontSize: 12, color: Color(0xFF7B7F8E)),
               ),
             ],
           ),
@@ -570,4 +444,3 @@ class _ProfileSummary extends StatelessWidget {
     );
   }
 }
-

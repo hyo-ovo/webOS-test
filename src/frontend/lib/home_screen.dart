@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/features/media_control/media_control.dart';
 import 'package:frontend/features/weather_clock_display/presentation/info_section.dart';
 import 'package:frontend/features/app_manager/presentation/widgets/app_launcher_widget.dart';
+import 'package:frontend/features/system_volume/presentation/widgets/volume_control_widget.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -71,6 +72,8 @@ class _TopHeader extends StatelessWidget {
         ),
         SizedBox(width: 32),
         _ProfileSummary(),
+        SizedBox(width: 32),
+        VolumeControlWidget(),
       ],
     );
   }

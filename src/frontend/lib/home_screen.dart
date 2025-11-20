@@ -137,27 +137,35 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'For Bigger Blazes',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF181A21),
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Spacer(),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Wrap(
-              spacing: 12,
-              runSpacing: 10,
-              children: const [
-                _TagChip(label: '드래곤'),
-                _TagChip(label: '코미디'),
-                _TagChip(label: '애니메이션'),
-              ],
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Expanded(
+                child: Text(
+                  'For Bigger Blazes',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF181A21),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Flexible(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: const [
+                      _TagChip(label: '드래곤'),
+                      _TagChip(label: '코미디'),
+                      _TagChip(label: '애니메이션'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

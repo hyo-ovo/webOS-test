@@ -110,7 +110,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
+      padding: const EdgeInsets.symmetric(horizontal: 32),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(36),
@@ -127,17 +127,14 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
         children: [
           Expanded(
             flex: 8,
-            child: Align(
-              alignment: Alignment.center,
-              child: AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
-                  child: VideoPlayerWidget(
-                    onPlay: null,
-                    caption: _openingMedia ? '재생 준비 중...' : null,
-                    videoUrl: widget.videoUrl,
-                  ),
+            child: AspectRatio(
+              aspectRatio: 16 / 9,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: VideoPlayerWidget(
+                  onPlay: null,
+                  caption: _openingMedia ? '재생 준비 중...' : null,
+                  videoUrl: widget.videoUrl,
                 ),
               ),
             ),

@@ -122,78 +122,51 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 8,
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
-                child: VideoPlayerWidget(
-                  onPlay: null,
-                  caption: _openingMedia ? '재생 준비 중...' : null,
-                  videoUrl: widget.videoUrl,
-                ),
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: VideoPlayerWidget(
+                onPlay: null,
+                caption: _openingMedia ? '재생 준비 중...' : null,
+                videoUrl: widget.videoUrl,
               ),
             ),
           ),
-          const SizedBox(width: 24),
-          Expanded(
-            flex: 3,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return SizedBox(
-                  height: constraints.maxHeight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Text(
-                              'For Bigger Blazes',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF181A21),
-                              ),
-                            ),
-                            SizedBox(height: 12),
-                            Text(
-                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-                              style: TextStyle(
-                                fontSize: 14,
-                                height: 1.5,
-                                color: Color(0xFF4C505C),
-                              ),
-                              maxLines: 3,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 20),
-                        child: Wrap(
-                          spacing: 12,
-                          runSpacing: 10,
-                          children: const [
-                            _TagChip(label: '드래곤'),
-                            _TagChip(label: '코미디'),
-                            _TagChip(label: '애니메이션'),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          const SizedBox(height: 24),
+          const Text(
+            'For Bigger Blazes',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF181A21),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.5,
+              color: Color(0xFF4C505C),
+            ),
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const Spacer(),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Wrap(
+              spacing: 12,
+              runSpacing: 10,
+              children: const [
+                _TagChip(label: '드래곤'),
+                _TagChip(label: '코미디'),
+                _TagChip(label: '애니메이션'),
+              ],
             ),
           ),
         ],

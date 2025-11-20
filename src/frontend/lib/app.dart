@@ -29,8 +29,8 @@ class MyApp extends StatelessWidget {
               TextStyle(fontFamily: 'Pretendard', fontWeight: FontWeight.w500),
         ),
       ),
-      //home: const HomeScreen(),
-      home: const InitialScreen(),
+      home: const HomeScreen(),
+      //home: const InitialScreen(),
     );
   }
 }

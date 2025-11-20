@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
-import '../../../../features/media_control/logic/services/volume_service.dart';
+import 'package:frontend/features/media_control/logic/services/volume_service.dart';
+import 'package:frontend/features/media_control/logic/services/volume_service_interface.dart';
 
 /// 시스템 볼륨 컨트롤러
 ///

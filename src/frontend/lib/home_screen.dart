@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
                             flex: 7,
                             child: _HeroSpotlight(
                               videoUrl:
-                                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                             ),
                           ),
                           SizedBox(width: 32),
@@ -68,14 +68,13 @@ class _TopHeader extends StatelessWidget {
         SizedBox(width: 32),
         Expanded(
           flex: 5,
-          child: Align(
-            alignment: Alignment.centerLeft,
-            child: SizedBox(
-              width: 240,
-              child: VolumeControlWidget(
-                height: 80,
-              ),
-            ),
+          child: _SearchField(),
+        ),
+        SizedBox(width: 32),
+        SizedBox(
+          width: 240,
+          child: VolumeControlWidget(
+            height: 80,
           ),
         ),
         SizedBox(width: 32),

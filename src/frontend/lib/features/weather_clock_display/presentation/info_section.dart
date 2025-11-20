@@ -29,7 +29,7 @@ class InfoSection extends StatelessWidget {
     final divColor = dividerColor ?? const Color(0xFF6B6B6B);
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         // 1. 시간 표시

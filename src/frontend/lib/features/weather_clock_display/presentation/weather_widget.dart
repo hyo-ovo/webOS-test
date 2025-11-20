@@ -16,12 +16,28 @@ class WeatherWidget extends StatefulWidget {
   final String? cityName;
   final Color? textColor;
   final bool showLoading;
+  final double? iconSize;
+  final double? temperatureFontSize;
+  final double? unitFontSize;
+  final double? conditionFontSize;
+  final bool showCondition;
+  final double? height;
+  final double textVerticalOffset;
+  final double iconVerticalOffset;
 
   const WeatherWidget({
     super.key,
     this.cityName,
     this.textColor,
     this.showLoading = false,
+    this.iconSize,
+    this.temperatureFontSize,
+    this.unitFontSize,
+    this.conditionFontSize,
+    this.showCondition = false,
+    this.height,
+    this.textVerticalOffset = 0,
+    this.iconVerticalOffset = 0,
   });
 
   @override
@@ -53,81 +69,128 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       value: _weatherController,
       child: Consumer<WeatherController>(
         builder: (context, controller, child) {
-          // 로딩 중이거나 에러 시 기본값 표시
+          final iconSize = widget.iconSize ?? 50.0;
           final temperature = controller.weather?.temperature.toInt() ?? 17;
+          final unitFontSize = widget.unitFontSize ?? 28.0;
+          final tempFontSize = widget.temperatureFontSize ?? 72.0;
+          final conditionFontSize = widget.conditionFontSize ?? 18.0;
+          final condition = controller.weather?.condition ?? '맑음';
+          final textColor = widget.textColor ?? const Color(0xFF6B6B6B);
 
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 6),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.center,
+          final temperatureText = Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                temperature.toString(),
+                style: GoogleFonts.inter(
+                  fontSize: tempFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: textColor,
+                  height: 1.0,
+                  letterSpacing: 0.123,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '°',
+                style: GoogleFonts.inter(
+                  fontSize: unitFontSize * 0.6,
+                  fontWeight: FontWeight.w400,
+                  color: textColor,
+                  height: 1.0,
+                ),
+              ),
+              const SizedBox(width: 2),
+              Text(
+                'C',
+                style: GoogleFonts.inter(
+                  fontSize: unitFontSize,
+                  fontWeight: FontWeight.w400,
+                  color: textColor,
+                  height: 1.0,
+                ),
+              ),
+            ],
+          );
+
+          Widget temperatureSection;
+          if (widget.showCondition) {
+            temperatureSection = Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 날씨 아이콘 (태양)
-                _buildWeatherIcon(controller),
-
-                const SizedBox(width: 19), // gap
-
-                // 온도 표시 영역
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // 온도 숫자
-                    Text(
-                      temperature.toString(),
-                      style: GoogleFonts.inter(
-                        fontSize: 72,
-                        fontWeight: FontWeight.w400, // Regular
-                        color: widget.textColor ?? const Color(0xFF6B6B6B),
-                        height: 90 / 72, // lineHeight / fontSize
-                        letterSpacing: 0.123,
-                      ),
-                    ),
-
-                    // 섭씨 기호 (°C)
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '°',
-                          style: GoogleFonts.inter(
-                            fontSize: 32,
-                            fontWeight: FontWeight.w400,
-                            color: widget.textColor ?? const Color(0xFF6B6B6B),
-                            height: 1.2,
-                          ),
-                        ),
-                        Text(
-                          'C',
-                          style: GoogleFonts.inter(
-                            fontSize: 48,
-                            fontWeight: FontWeight.w400,
-                            color: widget.textColor ?? const Color(0xFF6B6B6B),
-                            height: 1.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                temperatureText,
+                const SizedBox(height: 6),
+                Text(
+                  condition,
+                  style: GoogleFonts.inter(
+                    fontSize: conditionFontSize,
+                    fontWeight: FontWeight.w400,
+                    color: textColor,
+                    height: 1.2,
+                  ),
                 ),
               ],
-            ),
+            );
+          } else {
+            temperatureSection = temperatureText;
+          }
+
+          final content = Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // 날씨 아이콘 (태양)
+              Transform.translate(
+                offset: Offset(0, widget.iconVerticalOffset),
+                child: _buildWeatherIcon(
+                  controller,
+                  iconSize: iconSize,
+                ),
+              ),
+              const SizedBox(width: 19), // gap
+              Transform.translate(
+                offset: Offset(0, widget.textVerticalOffset),
+                child: temperatureSection,
+              ),
+            ],
           );
+
+          final wrapped = Padding(
+            padding: EdgeInsets.zero,
+            child: content,
+          );
+
+          if (widget.height != null) {
+            return SizedBox(
+              height: widget.height,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: wrapped,
+              ),
+            );
+          }
+
+          return wrapped;
         },
       ),
     );
   }
 
   /// 날씨 아이콘 생성 (그라디언트 태양)
-  Widget _buildWeatherIcon(WeatherController controller) {
-    // 날씨 상태에 따라 아이콘 변경 가능
+  Widget _buildWeatherIcon(
+    WeatherController controller, {
+    required double iconSize,
+  }) {
     final condition = controller.weather?.condition ?? '맑음';
     final isLoading = controller.isLoading;
 
     if (isLoading) {
       return SizedBox(
-        width: 50,
-        height: 50,
+        width: iconSize,
+        height: iconSize,
         child: CircularProgressIndicator(
           strokeWidth: 2,
           valueColor: AlwaysStoppedAnimation(
@@ -150,8 +213,8 @@ class _WeatherWidgetState extends State<WeatherWidget> {
     }
 
     return Container(
-      width: 50,
-      height: 50,
+      width: iconSize,
+      height: iconSize,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
@@ -166,7 +229,7 @@ class _WeatherWidgetState extends State<WeatherWidget> {
       child: Icon(
         icon,
         color: Colors.white,
-        size: 30, // 아이콘 크기 (50px 컨테이너의 6.25% inset 고려)
+        size: iconSize * 0.6, // padding 적용
       ),
     );
   }

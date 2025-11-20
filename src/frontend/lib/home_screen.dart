@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
                             flex: 7,
                             child: _HeroSpotlight(
                               videoUrl:
-                                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+                                  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
                             ),
                           ),
                           SizedBox(width: 32),
@@ -66,14 +66,15 @@ class _TopHeader extends StatelessWidget {
           child: ResponsiveInfoSection(cityName: 'Seoul'),
         ),
         SizedBox(width: 32),
-        Expanded(
-          flex: 5,
-          child: _SearchField(),
+        SizedBox(width: 32),
+        SizedBox(
+          width: 240,
+          child: VolumeControlWidget(
+            height: 80,
+          ),
         ),
         SizedBox(width: 32),
         _ProfileSummary(),
-        SizedBox(width: 32),
-        VolumeControlWidget(),
       ],
     );
   }
@@ -109,7 +110,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 30),
+      padding: const EdgeInsets.fromLTRB(32, 24, 32, 0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(36),
@@ -121,77 +122,50 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 6,
-            child: VideoPlayerWidget(
-              onPlay: null,
-              caption: _openingMedia ? '재생 준비 중...' : null,
-              videoUrl: widget.videoUrl,
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: VideoPlayerWidget(
+                onPlay: null,
+                caption: _openingMedia ? '재생 준비 중...' : null,
+                videoUrl: widget.videoUrl,
+              ),
             ),
           ),
-          const SizedBox(width: 30),
-          Expanded(
-            flex: 5,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'THE GENTLEMEN',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF181A21),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'An American expat tries to sell off his highly profitable marijuana '
-                              'empire in London, triggering plots, schemes, bribery and blackmail in '
-                              'an attempt to steal his domain out from under him.',
-                              style: TextStyle(
-                                fontSize: 15,
-                                height: 1.6,
-                                color: Color(0xFF4C505C),
-                              ),
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              SizedBox(height: 22),
-                              Wrap(
-                                spacing: 14,
-                                runSpacing: 12,
-                                children: [
-                                  _TagChip(label: '액션'),
-                                  _TagChip(label: '코미디'),
-                                  _TagChip(label: '영국'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+          const SizedBox(height: 24),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Expanded(
+                child: Text(
+                  'For Bigger Blazes',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF181A21),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Flexible(
+                child: Align(
+                  alignment: Alignment.topRight,
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: const [
+                      _TagChip(label: '드래곤'),
+                      _TagChip(label: '코미디'),
+                      _TagChip(label: '애니메이션'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -473,36 +447,39 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      height: 58,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: TextField(
-          readOnly: true,
-          decoration: InputDecoration(
-            hintText: '무엇을 도와드릴까요?',
-            hintStyle: TextStyle(
-              color: colors.onSurfaceVariant,
-              fontSize: 16,
-            ),
-            border: InputBorder.none,
-            prefixIcon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Icon(Icons.search_rounded, size: 26),
-            ),
-            suffixIcon: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.mic_none_rounded, size: 26),
+    return FractionallySizedBox(
+      widthFactor: 11 / 12,
+      child: SizedBox(
+        height: 58,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: '무엇을 도와드릴까요?',
+              hintStyle: TextStyle(
+                color: colors.onSurfaceVariant,
+                fontSize: 16,
+              ),
+              border: InputBorder.none,
+              prefixIcon: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18),
+                child: Icon(Icons.search_rounded, size: 26),
+              ),
+              suffixIcon: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.mic_none_rounded, size: 26),
+              ),
             ),
           ),
         ),

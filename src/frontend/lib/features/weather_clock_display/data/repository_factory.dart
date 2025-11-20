@@ -11,14 +11,16 @@ class RepositoryFactory {
   /// 현재 실행 환경 확인
   static bool get isWebOS {
     // webOS 환경 감지 로직
-    // Linux 플랫폼이고 웹이 아니면 webOS로 간주
-    // (webOS는 Linux 기반이고, macOS/Windows와 구분 가능)
+    // TODO: 실제 webOS 감지 로직으로 교체 필요
+    // 예: 환경변수, 플랫폼 채널 확인 등
 
-    if (kIsWeb) return false;
+    // 방법 1: kIsWeb을 사용하지 않고 플랫폼 체크
+    // 방법 2: 환경변수 체크
+    // 방법 3: MethodChannel 사용 가능 여부 체크
 
-    // Linux 플랫폼이면 webOS
-    // macOS는 TargetPlatform.macOS, Windows는 TargetPlatform.windows
-    return defaultTargetPlatform == TargetPlatform.linux;
+    // 임시: 디버그 모드에서는 false (일반 HTTP)
+    // 릴리즈 빌드(.ipk)에서는 true (webOS)
+    return kReleaseMode && !kIsWeb;
   }
 
   /// 날씨 Repository 생성

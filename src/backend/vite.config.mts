@@ -1,20 +1,13 @@
-import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-	plugins: [tsconfigPaths()],
 	test: {
-		globals: true,
-		environment: "node",
 		coverage: {
-			provider: "v8",
-			reporter: ["text", "json", "html"],
-			exclude: [
-				"node_modules/**",
-				"dist/**",
-				"**/*.test.ts",
-				"**/*.spec.ts",
-			],
-		}
-	}
+			exclude: ["**/node_modules/**", "**/index.ts, ", "vite.config.mts"],
+		},
+		globals: true,
+		restoreMocks: true,
+	},
+	plugins: [tsconfigPaths()],
 });

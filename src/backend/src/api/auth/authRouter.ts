@@ -1,72 +1,95 @@
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
-import express, { type Router } from "express";
+import { Router } from "express";
+import multer from "multer";
 import { z } from "zod";
+import { env } from "@/common/utils/envConfig";
 import { authController } from "./authController";
-import { createApiResponse } from "@/api-docs/openAPIResponseBuilders";
 
 export const authRegistry = new OpenAPIRegistry();
-export const authRouter: Router = express.Router();
 
-const SignupRequestSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
-  isChild: z.boolean().default(false),
+// Schema 정의
+const FaceLoginResponseSchema = z.object({
+	token: z.string(),
+	userId: z.number(),
+	username: z.string(),
 });
 
-const SignupResponseSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  isChild: z.boolean(),
-  createdAt: z.string(),
-});
-
-const LoginRequestSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  password: z.string().min(1, "Password is required"),
-});
-
-const LoginResponseSchema = z.object({
-  token: z.string(),
-  user: z.object({
-    id: z.number(),
-    name: z.string(),
-    isChild: z.boolean(),
-  }),
+// API 등록
+authRegistry.registerPath({
+	method: "post",
+	path: "/auth/face-login",
+	tags: ["Auth"],
+	summary: "얼굴인식 로그인",
+	request: {
+		body: {
+			content: {
+				"multipart/form-data": {
+					schema: z.object({
+						image: z.instanceof(File).describe("얼굴 사진"),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		200: {
+			description: "로그인 성공",
+			content: {
+				"application/json": {
+					schema: FaceLoginResponseSchema,
+				},
+			},
+		},
+		401: {
+			description: "인증 실패",
+		},
+	},
 });
 
 authRegistry.registerPath({
-  method: "post",
-  path: "/auth/signup",
-  tags: ["Auth"],
-  summary: "Register a new user",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: SignupRequestSchema,
-        },
-      },
-    },
-  },
-  responses: createApiResponse(SignupResponseSchema, "User created successfully", 201),
+	method: "post",
+	path: "/auth/register-face",
+	tags: ["Auth"],
+	summary: "얼굴 등록 (개발용)",
+	request: {
+		body: {
+			content: {
+				"multipart/form-data": {
+					schema: z.object({
+						image: z.instanceof(File).describe("얼굴 사진"),
+						username: z.string().optional().describe("사용자 이름"),
+					}),
+				},
+			},
+		},
+	},
+	responses: {
+		201: {
+			description: "등록 성공",
+		},
+	},
 });
 
-authRegistry.registerPath({
-  method: "post",
-  path: "/auth/login",
-  tags: ["Auth"],
-  summary: "Login with name and password",
-  request: {
-    body: {
-      content: {
-        "application/json": {
-          schema: LoginRequestSchema,
-        },
-      },
-    },
-  },
-  responses: createApiResponse(LoginResponseSchema, "Login successful"),
+const upload = multer({
+	storage: multer.memoryStorage(),
+	limits: { fileSize: env.MAX_FILE_SIZE },
+	fileFilter: (_req, file, cb) => {
+		if (file.mimetype.startsWith("image/")) {
+			cb(null, true);
+		} else {
+			cb(new Error("이미지 파일만 업로드 가능합니다"));
+		}
+	},
 });
 
-authRouter.post("/signup", authController.signup);
-authRouter.post("/login", authController.login);
+export const authRouter: Router = (() => {
+	const router = Router();
+
+	// 얼굴인식 로그인
+	router.post("/face-login", upload.single("image"), authController.faceLogin);
+
+	// 얼굴 등록 (개발용)
+	router.post("/register-face", upload.single("image"), authController.registerFace);
+
+	return router;
+})();

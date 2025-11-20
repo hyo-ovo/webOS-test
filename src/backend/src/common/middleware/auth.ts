@@ -13,11 +13,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 		const authHeader = req.headers.authorization;
 
 		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-			const response = ServiceResponse.failure(
-				"Authorization token required",
-				null,
-				StatusCodes.UNAUTHORIZED
-			);
+			const response = ServiceResponse.failure("인증 토큰이 필요합니다", null, StatusCodes.UNAUTHORIZED);
 			return res.status(response.statusCode).json(response);
 		}
 
@@ -28,11 +24,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 
 		next();
 	} catch (_error) {
-		const response = ServiceResponse.failure(
-			"Invalid token",
-			null,
-			StatusCodes.UNAUTHORIZED
-		);
+		const response = ServiceResponse.failure("유효하지 않은 토큰입니다", null, StatusCodes.UNAUTHORIZED);
 		return res.status(response.statusCode).json(response);
 	}
 };

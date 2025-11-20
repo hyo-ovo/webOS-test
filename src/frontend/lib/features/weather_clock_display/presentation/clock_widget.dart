@@ -18,11 +18,19 @@ import '../logic/clock_service.dart';
 class ClockWidget extends StatefulWidget {
   final double? width;
   final Color? textColor;
+  final double? fontSize;
+  final double? amPmFontSize;
+  final double? height;
+  final double verticalOffset;
 
   const ClockWidget({
     super.key,
     this.width,
     this.textColor,
+    this.fontSize,
+    this.amPmFontSize,
+    this.height,
+    this.verticalOffset = 0,
   });
 
   @override
@@ -62,38 +70,45 @@ class _ClockWidgetState extends State<ClockWidget> {
 
           final timeString =
               '${hour12.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}';
+          final timeFontSize = widget.fontSize ?? 72;
+          final amPmFontSize = widget.amPmFontSize ?? 36;
 
           return SizedBox(
             width: widget.width ?? 269,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 시간 표시 (HH:MM)
-                  Text(
-                    timeString,
-                    style: GoogleFonts.inter(
-                      fontSize: 72,
-                      fontWeight: FontWeight.w400, // Regular
-                      color: widget.textColor ?? const Color(0xFF6B6B6B),
-                      height: 90 / 72, // lineHeight / fontSize
-                      letterSpacing: 0.123,
+            height: widget.height,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Transform.translate(
+                offset: Offset(0, widget.verticalOffset),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 시간 표시 (HH:MM)
+                    Text(
+                      timeString,
+                      style: GoogleFonts.inter(
+                        fontSize: timeFontSize,
+                        fontWeight: FontWeight.w400, // Regular
+                        color: widget.textColor ?? const Color(0xFF6B6B6B),
+                        height: 1.0,
+                        letterSpacing: 0.123,
+                      ),
                     ),
-                  ),
-
-                  // AM/PM 표시
-                  Text(
-                    amPm,
-                    style: GoogleFonts.inter(
-                      fontSize: 36,
-                      fontWeight: FontWeight.w400, // Regular
-                      color: widget.textColor ?? const Color(0xFF6B6B6B),
-                      height: 90 / 36, // lineHeight / fontSize
+                    const SizedBox(width: 12),
+                    // AM/PM 표시
+                    Text(
+                      amPm,
+                      style: GoogleFonts.inter(
+                        fontSize: amPmFontSize,
+                        fontWeight: FontWeight.w400, // Regular
+                        color: widget.textColor ?? const Color(0xFF6B6B6B),
+                        height: 1.0,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           );

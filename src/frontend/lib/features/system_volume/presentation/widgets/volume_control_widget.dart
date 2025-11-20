@@ -75,7 +75,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
 
                 // 볼륨 감소 버튼
                 _buildVolumeButton(
-                  icon: Icons.volume_down,
+                  icon: Icons.remove,
                   onPressed: controller.isLoading
                       ? null
                       : () => controller.volumeDown(),
@@ -86,7 +86,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
 
                 // 볼륨 증가 버튼
                 _buildVolumeButton(
-                  icon: Icons.volume_up,
+                  icon: Icons.add,
                   onPressed: controller.isLoading
                       ? null
                       : () => controller.volumeUp(),

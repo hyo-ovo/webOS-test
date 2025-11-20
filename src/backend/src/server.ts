@@ -1,58 +1,43 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
-import pino from "pino";
-
-import { openAPIRouter } from "@/api-docs/openAPIRouter";
+import { pino } from "pino";
 import { appsRouter } from "@/api/apps/appsRouter";
 import { authRouter } from "@/api/auth/authRouter";
+import { favoritesRouter } from "@/api/favorites/favoritesRouter";
 import { memoRouter } from "@/api/memo/memoRouter";
+import { openAPIRouter } from "@/api-docs/openAPIRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
 import { env } from "@/common/utils/envConfig";
 
-export const logger = pino({
-  name: "server",
-  level: env.isProduction ? "info" : "debug",
-  transport:
-    env.LOG_FORMAT === "pretty"
-      ? {
-          target: "pino-pretty",
-          options: {
-            colorize: true,
-            translateTime: "HH:MM:ss Z",
-            ignore: "pid,hostname",
-          },
-        }
-      : undefined,
-});
-
+const logger = pino({ name: "server start" });
 const app: Express = express();
 
-app.set("trust proxy", 1);  
+// Set the application to trust the reverse proxy
+app.set("trust proxy", true);
 
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
-app.use(cors({ origin: true, credentials: true }));
 app.use(rateLimiter);
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Request logging
 app.use(requestLogger);
 
-app.use("/swagger", openAPIRouter);
+// Routes
 app.use("/auth", authRouter);
 app.use("/apps", appsRouter);
-app.use("/memos", memoRouter);
+app.use("/memo", memoRouter);
+app.use("/favorites", favoritesRouter);
 
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    message: "Route not found",
-    path: req.path,
-    statusCode: 404,
-  });
-});
+// Swagger UI
+app.use(openAPIRouter);
 
+// Error handlers
 app.use(errorHandler());
 
-export { app };
+export { app, logger };

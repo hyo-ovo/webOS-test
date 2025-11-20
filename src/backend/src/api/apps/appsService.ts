@@ -1,70 +1,48 @@
 import { StatusCodes } from "http-status-codes";
 import { ServiceResponse } from "@/common/models/serviceResponse";
+import type { UserAppOrder } from "@/common/types";
 import { logger } from "@/server";
 import { appsRepository } from "./appsRepository";
-import type { UserAppResponse, UpdateAppOrderRequest } from "@/common/types";
 
 class AppsService {
-  async getUserApps(
-    userId: number
-  ): Promise<ServiceResponse<UserAppResponse[] | null>> {
-    try {
-      const apps = await appsRepository.getUserApps(userId);
-      return ServiceResponse.success("User apps retrieved successfully", apps);
-    } catch (error) {
-      logger.error({ error }, "Get user apps error");
-      return ServiceResponse.failure(
-        "Failed to retrieve user apps",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
+	/**
+	 * 사용자별 앱 순서 조회
+	 * @param userId 사용자 ID
+	 * @returns 앱 ID 순서 배열 (예: ['com.webos.app.browser', 'com.webos.app.settings'])
+	 */
+	async getUserAppOrder(userId: number): Promise<ServiceResponse<Pick<UserAppOrder, "app_order"> | null>> {
+		try {
+			const order = await appsRepository.getUserAppOrder(userId);
+			return ServiceResponse.success("앱 순서 조회 성공", order || { app_order: [] });
+		} catch (error) {
+			logger.error({ error }, "Get user app order error");
+			return ServiceResponse.failure("앱 순서 조회 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 
-  async updateUserAppOrder(
-    userId: number,
-    data: UpdateAppOrderRequest
-  ): Promise<ServiceResponse<{ success: boolean } | null>> {
-    try {
-      const { apps } = data;
+	/**
+	 * 사용자별 앱 순서 저장
+	 * @param userId 사용자 ID
+	 * @param order 앱 ID 순서 배열 (예: ['com.webos.app.browser', 'com.webos.app.settings'])
+	 */
+	async updateUserAppOrder(userId: number, order: string[]): Promise<ServiceResponse<UserAppOrder | null>> {
+		try {
+			// 앱 ID 유효성 검사 (webOS 앱 ID 형식)
+			const isValidAppId = (id: string) => /^[a-z][a-z0-9]*(\.[a-z][a-z0-9]*)+$/i.test(id);
+			const invalidIds = order.filter((id) => !isValidAppId(id));
 
-      if (!Array.isArray(apps) || apps.length === 0) {
-        return ServiceResponse.failure(
-          "apps must be a non-empty array",
-          null,
-          StatusCodes.BAD_REQUEST
-        );
-      }
+			if (invalidIds.length > 0) {
+				logger.warn({ invalidIds }, "Invalid app IDs detected");
+				return ServiceResponse.failure(`유효하지 않은 앱 ID: ${invalidIds.join(", ")}`, null, StatusCodes.BAD_REQUEST);
+			}
 
-      // 각 앱 정보 검증
-      for (const app of apps) {
-        if (!app.name || !app.imgPath || !app.runPath) {
-          return ServiceResponse.failure(
-            "Each app must have name, imgPath, and runPath",
-            null,
-            StatusCodes.BAD_REQUEST
-          );
-        }
-      }
-
-      await appsRepository.updateUserAppOrder(userId, apps);
-
-      return ServiceResponse.success("App order updated successfully", {
-        success: true,
-      });
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error";
-      logger.error({ error }, "Update user app order error");
-      return ServiceResponse.failure(
-        errorMessage.includes("Failed to create")
-          ? errorMessage
-          : "Failed to update app order",
-        null,
-        StatusCodes.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
+			const result = await appsRepository.updateUserAppOrder(userId, order);
+			return ServiceResponse.success("앱 순서 저장 성공", result);
+		} catch (error) {
+			logger.error({ error }, "Update user app order error");
+			return ServiceResponse.failure("앱 순서 저장 실패", null, StatusCodes.INTERNAL_SERVER_ERROR);
+		}
+	}
 }
 
 export const appsService = new AppsService();

@@ -53,7 +53,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
       child: Consumer<VolumeController>(
         builder: (context, controller, child) {
           return Container(
-            height: widget.height ?? 40,
+            height: widget.height ?? 80,
             decoration: BoxDecoration(
               color: widget.backgroundColor ??
                   Colors.black.withOpacity(0.7),
@@ -63,7 +63,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
                 width: 1,
               ),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -75,7 +75,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
 
                 // 볼륨 감소 버튼
                 _buildVolumeButton(
-                  icon: Icons.volume_down,
+                  icon: Icons.remove,
                   onPressed: controller.isLoading
                       ? null
                       : () => controller.volumeDown(),
@@ -86,7 +86,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
 
                 // 볼륨 증가 버튼
                 _buildVolumeButton(
-                  icon: Icons.volume_up,
+                  icon: Icons.add,
                   onPressed: controller.isLoading
                       ? null
                       : () => controller.volumeUp(),
@@ -111,7 +111,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
         onTap: isLoading ? null : () => controller.toggleMute(),
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: isMuted
                 ? Colors.red.withOpacity(0.3)
@@ -128,7 +128,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
             isMuted ? Icons.volume_off : Icons.volume_up,
             color: widget.iconColor ??
                 (isMuted ? Colors.red : Colors.white),
-            size: 20,
+            size: 28,
           ),
         ),
       ),
@@ -149,7 +149,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(12),
@@ -160,8 +160,8 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
           ),
           child: isLoading
               ? SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: 28,
+                  height: 28,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -172,7 +172,7 @@ class _VolumeControlWidgetState extends State<VolumeControlWidget> {
               : Icon(
                   icon,
                   color: widget.iconColor ?? Colors.white,
-                  size: 20,
+                  size: 28,
                 ),
         ),
       ),

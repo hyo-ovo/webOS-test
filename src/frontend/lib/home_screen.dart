@@ -68,8 +68,14 @@ class _TopHeader extends StatelessWidget {
         SizedBox(width: 32),
         Expanded(
           flex: 5,
-          child: VolumeControlWidget(
-            height: 40,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: SizedBox(
+              width: 240,
+              child: VolumeControlWidget(
+                height: 80,
+              ),
+            ),
           ),
         ),
         SizedBox(width: 32),

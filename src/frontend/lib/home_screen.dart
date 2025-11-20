@@ -68,12 +68,12 @@ class _TopHeader extends StatelessWidget {
         SizedBox(width: 32),
         Expanded(
           flex: 5,
-          child: _SearchField(),
+          child: VolumeControlWidget(
+            height: 80,
+          ),
         ),
         SizedBox(width: 32),
         _ProfileSummary(),
-        SizedBox(width: 32),
-        VolumeControlWidget(),
       ],
     );
   }

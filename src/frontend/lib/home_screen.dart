@@ -157,41 +157,45 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          SizedBox(height: 8),
-                          Text(
-                            'For Bigger Blazes',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF181A21),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: const [
+                            Text(
+                              'For Bigger Blazes',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF181A21),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 12),
-                          Text(
-                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-                            style: TextStyle(
-                              fontSize: 14,
-                              height: 1.5,
-                              color: Color(0xFF4C505C),
+                            SizedBox(height: 12),
+                            Text(
+                              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.5,
+                                color: Color(0xFF4C505C),
+                              ),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 10,
-                        children: const [
-                          _TagChip(label: '드래곤'),
-                          _TagChip(label: '코미디'),
-                          _TagChip(label: '애니메이션'),
-                          SizedBox(height: 8),
-                        ],
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 10,
+                          children: const [
+                            _TagChip(label: '드래곤'),
+                            _TagChip(label: '코미디'),
+                            _TagChip(label: '애니메이션'),
+                          ],
+                        ),
                       ),
                     ],
                   ),

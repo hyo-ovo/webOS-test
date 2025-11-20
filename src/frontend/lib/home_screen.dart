@@ -69,7 +69,7 @@ class _TopHeader extends StatelessWidget {
         Expanded(
           flex: 5,
           child: VolumeControlWidget(
-            height: 80,
+            height: 40,
           ),
         ),
         SizedBox(width: 32),

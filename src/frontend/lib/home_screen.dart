@@ -66,10 +66,6 @@ class _TopHeader extends StatelessWidget {
           child: ResponsiveInfoSection(cityName: 'Seoul'),
         ),
         SizedBox(width: 32),
-        Expanded(
-          flex: 5,
-          child: _SearchField(),
-        ),
         SizedBox(width: 32),
         SizedBox(
           width: 240,
@@ -158,7 +154,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 8),
+                        padding: const EdgeInsets.only(top: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
@@ -186,7 +182,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: const EdgeInsets.only(bottom: 20),
                         child: Wrap(
                           spacing: 12,
                           runSpacing: 10,

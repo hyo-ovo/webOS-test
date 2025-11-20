@@ -161,6 +161,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: const [
+                          SizedBox(height: 8),
                           Text(
                             'For Bigger Blazes',
                             style: TextStyle(
@@ -189,6 +190,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                           _TagChip(label: '드래곤'),
                           _TagChip(label: '코미디'),
                           _TagChip(label: '애니메이션'),
+                          SizedBox(height: 8),
                         ],
                       ),
                     ],
@@ -477,36 +479,39 @@ class _SearchField extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colors = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      height: 58,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: TextField(
-          readOnly: true,
-          decoration: InputDecoration(
-            hintText: '무엇을 도와드릴까요?',
-            hintStyle: TextStyle(
-              color: colors.onSurfaceVariant,
-              fontSize: 16,
-            ),
-            border: InputBorder.none,
-            prefixIcon: const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18),
-              child: Icon(Icons.search_rounded, size: 26),
-            ),
-            suffixIcon: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.mic_none_rounded, size: 26),
+    return FractionallySizedBox(
+      widthFactor: 11 / 12,
+      child: SizedBox(
+        height: 58,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 12),
+              ),
+            ],
+          ),
+          child: TextField(
+            readOnly: true,
+            decoration: InputDecoration(
+              hintText: '무엇을 도와드릴까요?',
+              hintStyle: TextStyle(
+                color: colors.onSurfaceVariant,
+                fontSize: 16,
+              ),
+              border: InputBorder.none,
+              prefixIcon: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 18),
+                child: Icon(Icons.search_rounded, size: 26),
+              ),
+              suffixIcon: IconButton(
+                onPressed: () {},
+                icon: const Icon(Icons.mic_none_rounded, size: 26),
+              ),
             ),
           ),
         ),

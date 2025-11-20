@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/features/media_control/media_control.dart';
+import 'package:frontend/features/memo/presentation/memo_board_widget.dart';
 import 'package:frontend/features/weather_clock_display/presentation/info_section.dart';
 import 'package:frontend/features/app_manager/presentation/widgets/app_launcher_widget.dart';
 import 'package:frontend/features/system_volume/presentation/widgets/volume_control_widget.dart';
@@ -319,86 +320,13 @@ class _MemoBoard extends StatelessWidget {
           ),
           SizedBox(height: 24),
           Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: _MemoSticky(
-                    title: '할일 메모',
-                    content: '할일 정기 어쩌구',
-                    color: Color(0xFF6DE4A5),
-                  ),
-                ),
-                SizedBox(width: 18),
-                Expanded(
-                  child: _MemoSticky(
-                    title: '아이디어',
-                    content: '',
-                    color: Color(0xFFFFE28B),
-                  ),
-                ),
-              ],
-            ),
+            child: MemoBoardWidget(),
           ),
         ],
       ),
     );
   }
 }
-
-class _MemoSticky extends StatelessWidget {
-  const _MemoSticky({
-    required this.title,
-    required this.content,
-    required this.color,
-  });
-
-  final String title;
-  final String content;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 18,
-            offset: const Offset(0, 14),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-              color: Color(0xFF272B33),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: Text(
-              content,
-              style: const TextStyle(
-                fontSize: 14,
-                height: 1.5,
-                color: Color(0xFF3B3F46),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _VerticalBadge extends StatelessWidget {
   const _VerticalBadge({required this.label});
 
@@ -545,6 +473,7 @@ class _ProfileSummary extends StatelessWidget {
         ],
       ),
     );
+    
   }
 }
 

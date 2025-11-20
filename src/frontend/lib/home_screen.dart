@@ -130,72 +130,59 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Expanded(
-            flex: 6,
-            child: VideoPlayerWidget(
-              onPlay: null,
-              caption: _openingMedia ? '재생 준비 중...' : null,
-              videoUrl: widget.videoUrl,
+            flex: 8,
+            child: Align(
+              alignment: Alignment.center,
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: VideoPlayerWidget(
+                    onPlay: null,
+                    caption: _openingMedia ? '재생 준비 중...' : null,
+                    videoUrl: widget.videoUrl,
+                  ),
+                ),
+              ),
             ),
           ),
-          const SizedBox(width: 30),
+          const SizedBox(width: 24),
           Expanded(
-            flex: 5,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'THE GENTLEMEN',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF181A21),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              'An American expat tries to sell off his highly profitable marijuana '
-                              'empire in London, triggering plots, schemes, bribery and blackmail in '
-                              'an attempt to steal his domain out from under him.',
-                              style: TextStyle(
-                                fontSize: 15,
-                                height: 1.6,
-                                color: Color(0xFF4C505C),
-                              ),
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              SizedBox(height: 22),
-                              Wrap(
-                                spacing: 14,
-                                runSpacing: 12,
-                                children: [
-                                  _TagChip(label: '액션'),
-                                  _TagChip(label: '코미디'),
-                                  _TagChip(label: '영국'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'THE GENTLEMEN',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF181A21),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'An American expat tries to sell off his highly profitable marijuana empire in London.',
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.5,
+                    color: Color(0xFF4C505C),
+                  ),
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 10,
+                  children: const [
+                    _TagChip(label: '액션'),
+                    _TagChip(label: '코미디'),
+                    _TagChip(label: '영국'),
                   ],
-                );
-              },
+                ),
+              ],
             ),
           ),
         ],
